@@ -1,8 +1,13 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+// import session from "express-session";
+// import passport from "./config/passport.js";
+import userRoutes from "./modules/users/user.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import facultyRoutes from "./modules/faculty/faculty.routes.js";
 import appConfig from "./config/app.config.js";
+
 const app = new express();
 
 app.use(cors({
@@ -11,10 +16,33 @@ app.use(cors({
     ],
     credentials: true
 }));
+
+// app.use(passport.initialize());
+// app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
 
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false
+//   })
+// );
+
+// passport.serializeUser(
+//   (user, done) => done(null, user)
+// );
+
+// passport.deserializeUser(
+//   (user, done) => done(null, user)
+// );
+
+
+// application-level-routes
 app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
+app.use('/faculty', facultyRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

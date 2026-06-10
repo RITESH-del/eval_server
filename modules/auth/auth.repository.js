@@ -10,6 +10,12 @@ export const findByEmail = (email) => {
   });
 };
 
+// find user by oidc sub
+// export const findByOidcSub = (oidcSub) => {
+//   return prisma.users.findUnique({ where: { oidc_sub: oidcSub } });
+// };
+
+
 // create user by id
 export const create = (data) => {
   const id = randomUUID();

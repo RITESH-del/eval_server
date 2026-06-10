@@ -18,9 +18,12 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "google-auth-library": "^10.7.0",
     "jsonwebtoken": "^9.0.3",
     "module-alias": "^2.3.4",
+    "passport": "^0.7.0",
+    "passport-openidconnect": "^0.1.2",
     "prisma": "^6.19.0",
     "zod": "^4.4.3"
   },

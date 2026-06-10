@@ -5,7 +5,7 @@ export const signupSchema = z.object({
   email: z.email(),
   password: z.string().min(8),
   universityId: z.string(),
-  role: z.enum(["student", "faculty"]),
+  // role: z.enum(["student", "faculty"]),
 });
 
 // login shcema

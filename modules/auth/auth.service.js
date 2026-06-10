@@ -6,6 +6,37 @@ import * as authRepo from "./auth.repository.js";
 
 const googleClient = new OAuth2Client();
 
+
+/* ==================================Helper Functions starts=====================================*/
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      role: user.role,
+      email: user.email,
+    },
+    authConfig.secret,
+    {
+      expiresIn: authConfig.secret_expires_in,
+    },
+  );
+};
+
+
+function determineRole(email) {
+   const localPart = email.split("@")[0];
+   const studentPattern = /\.\d{2}[a-z]{2,4}$/i; // checks patterns like 24cse, 23ece, or 25me etc
+
+  if (studentPattern.test(localPart)) {
+    return "student";
+  }
+
+  return "faculty";
+}
+
+/* ==================================Helper Functions ends=====================================*/
+
+
 export const signup = async (data) => {
   const existing = await authRepo.findByEmail(data.email);
 
@@ -14,9 +45,11 @@ export const signup = async (data) => {
   }
 
   const hash = await bcrypt.hash(data.password, 10);
-  const { password, universityId, ...rest } = data;
+  const { email, password, universityId, ...rest } = data;
   const user = await authRepo.create({
     ...rest,
+    email,
+    role: determineRole(email),
     university_id: universityId,
     password_hash: hash,
   });
@@ -32,24 +65,19 @@ export const login = async ({ email, password }) => {
   if (!match) throw new Error("Invalid credentials");
   const token = generateToken(user);
 
+  // for testing
+  const decoded = jwt.decode(token);
+  console.log(decoded);
+  console.log("Lifetime:", decoded.exp - decoded.iat);
+
+
   return {
     token,
     user,
   };
 };
 
-const generateToken = (user) => {
-  return jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-    },
-    authConfig.secret,
-    {
-      expiresIn: authConfig.secret_expires_in,
-    },
-  );
-};
+
 
 export const googleLogin = async (credential) => {
   const ticket = await googleClient.verifyIdToken({
@@ -76,3 +104,32 @@ export const googleLogin = async (credential) => {
     accessToken,
   };
 };
+
+
+
+// export const ssoCallback = async (req, res) => {
+//     const profile = req.user;
+//     const oidcSub = profile.id; // OIDC unique id
+//     const email = profile.emails[0].value;
+//     const name = profile.displayName;
+
+//     let user = await authRepo.findByOidcSub(oidcSub);
+
+//     if (!user) {  
+//       const role = determineRole(email);
+//       user = await authRepo.create({ oidc_sub: oidcSub, email, name, role });
+//     }
+
+//     const token = generateToken(user);
+
+//     res.cookie( "token", token,
+//       {
+//         httpOnly: true,
+//         secure: true,
+//         sameSite: "lax"
+//       }
+//     );
+
+//     res.redirect(`${process.env.FRONTEND_URL}/auth/success`); // need to create a auth success page in frontend later
+// };
+
