@@ -23,7 +23,7 @@ export const login = async (req, res, next) => {
 export const logout = async (req, res, next) => {
   try {
     res.clearCookie("token");
-    req.logout(() => {}); // passport removes the user from req.user and req.session
+    // req.logout(() => {}); // passport removes the user from req.user and req.session
     res.json({ message: "Logged out successfully" });
   } catch (err) {
     next(err);

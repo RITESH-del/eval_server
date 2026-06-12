@@ -39,10 +39,19 @@ export const getAllSubmissions = async (req, res, next) => {
 
 export const getSubmissionById = async (req, res, next) => {
   try {
-    const submission = await facultyService.getSubmissionById(req.params.examId, req.params.studentId); // its student_exam_session id
+    const submission = await facultyService.getSubmissionById(req.params.examId, req.params.sessionId); // its student_exam_session id
     res.json(submission);
   } catch (err) {
     next(err);
   }
 }
 
+
+export const getMetaData = async (req, res, next) => {
+  try {
+    const metaData = await facultyService.getMetaData();
+    res.json(metaData);
+  } catch (err) {
+    next(err);
+  }
+}

@@ -18,10 +18,15 @@ export const getLabs = (facultyId) => {
  
 
 export const getLabDetails = (examId) => {
-    return prisma.student_exam_sessions.findUnique({
+    return prisma.student_exam_sessions.findMany({
         where: {
             exam_id: examId
-        }   
+        },
+        include: {
+          users: true,
+          exams: true,
+          submissions: true
+        }
     })
 }
 
@@ -59,11 +64,11 @@ return sessions;
 }
 
 
-export const getSubmissionById = async (examId, studentId) => {
+export const getSubmissionById = async (examId, sessionId) => {
   const session = await prisma.student_exam_sessions.findFirst({
   where: {
+    id: sessionId,
     exam_id: examId,
-    student_id: studentId,
   },
   include: {
     users: true,
@@ -83,5 +88,21 @@ export const getSubmissionById = async (examId, studentId) => {
 
   return session;
 };
+
+
+export const years = async () => await prisma.users.findMany({
+  distinct: ["graduation_year"],
+  select: {
+    graduation_year: true
+  }
+});
+
+export const sections = async () => await prisma.users.findMany({
+  where: { role: "student" },
+  distinct: ["section"],
+  select: {
+    section: true
+  }
+});
 
 

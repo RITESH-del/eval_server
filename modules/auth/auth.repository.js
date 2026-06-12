@@ -6,7 +6,7 @@ export const findByEmail = (email) => {
   return prisma.users.findUnique({
     where: {
       email,
-    },
+    }
   });
 };
 

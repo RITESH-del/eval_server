@@ -6,7 +6,7 @@ export const findById = (userId) => {
       id: userId,
     },
     select: {
-    //   id: true,
+      id: true,
       email: true,
       name: true,
       role: true,

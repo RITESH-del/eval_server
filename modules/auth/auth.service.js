@@ -82,7 +82,7 @@ export const login = async ({ email, password }) => {
 export const googleLogin = async (credential) => {
   const ticket = await googleClient.verifyIdToken({
     idToken: credential,
-  });
+});
 
   const payload = ticket.getPayload();
   const email = payload.email;

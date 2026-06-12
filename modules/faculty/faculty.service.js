@@ -14,15 +14,28 @@ export const getLabs = async (facultyId) => {
 }
 
 export const getLabDetails = async (examId) => {
-    return await facultyRepo.getLabDetails( examId )
+    const sessions = await facultyRepo.getLabDetails(examId)
+
+    return sessions.map(session => ({
+        session_id: session.id,
+        university_id: session.users?.university_id,
+        name: session.users?.name,
+        section: session.users?.section,
+        language: session.submissions?.[0]?.language,
+        status: session.status,
+        manual_score: session.submissions?.[0]?.manual_score,
+        autograding_score: session.submissions?.[0]?.autograding_score,
+        title: session.exams?.title,
+    }));
 }
 
 export const getAllSubmissions = async (facultyId) => {
     return await facultyRepo.getAllSubmissions(facultyId)
 }
 
-export const getSubmissionById = async (examId, studentId) => {
-    const session =  await facultyRepo.getSubmissionById(examId, studentId);     
+
+export const getSubmissionById = async (examId, sessionId) => {
+    const session =  await facultyRepo.getSubmissionById(examId, sessionId);     
 
     const response = {
         session_id: session.id,
@@ -38,8 +51,6 @@ export const getSubmissionById = async (examId, studentId) => {
 
         responses: [],
         };
-
-    
 
     // group by questions 
     const grouped = {};
@@ -72,3 +83,24 @@ export const getSubmissionById = async (examId, studentId) => {
 
     return response;
 }
+
+
+export const getMetaData = async () => {
+    const [years, sections] = await Promise.all([
+        facultyRepo.years(),
+        facultyRepo.sections()
+    ]);
+
+     const graduationYears = years
+    .map(y => y.graduation_year)
+    .sort((a, b) => b - a)
+    .slice(0, 4)
+    .sort((a, b) => a - b);
+
+  return {
+    target_graduation_year: graduationYears,
+    target_section: sections
+      .map(s => s.section)
+      .sort()
+  };
+};
