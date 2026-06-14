@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import authConfig from "../../config/auth.config.js";
+import config from "../../config/app.config.js";
 import * as authRepo from "./auth.repository.js";
 
 const googleClient = new OAuth2Client();
@@ -15,9 +15,9 @@ const generateToken = (user) => {
       role: user.role,
       email: user.email,
     },
-    authConfig.secret,
+    config.jwt.secret,
     {
-      expiresIn: authConfig.secret_expires_in,
+      expiresIn: config.jwt.expiresIn,
     },
   );
 };

@@ -6,13 +6,13 @@ import cors from "cors";
 import userRoutes from "./modules/users/user.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import facultyRoutes from "./modules/faculty/faculty.routes.js";
-import appConfig from "./config/app.config.js";
+import config from "./config/app.config.js";
 
 const app = new express();
 
 app.use(cors({
     origin: [
-        'http://localhost:5173',  // add production url later
+        'http://localhost:5173',  // add frontend production url later
     ],
     credentials: true
 }));
@@ -53,6 +53,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(appConfig.port, () => {
-  console.log(`Server listening at http://localhost:${appConfig.port}`);
-});
+if (config.node_env !== 'test') {
+  app.listen(config.port, () => {
+    console.log(`Server listening at http://localhost:${config.port}`);
+  });
+}
