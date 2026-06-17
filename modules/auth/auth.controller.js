@@ -39,11 +39,11 @@ export const googleLogin = async (req, res, next) => {
   }
 };
 
-export const ssoCallback = async (req, res, next) => {
-  try {
-    await authService.ssoCallback(req.user); //attach user object to req   
-    res.redirect(`${process.env.FRONTEND_URL}/${role}/dashboard`);
-  } catch (err) {
-    next(err);
-  }
-};
+// export const ssoCallback = async (req, res, next) => {
+//   try {
+//     await authService.ssoCallback(req.user); //attach user object to req   
+//     res.redirect(`${process.env.FRONTEND_URL}/${role}/dashboard`);
+//   } catch (err) {
+//     next(err);
+//   }
+// };

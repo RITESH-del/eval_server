@@ -13,7 +13,6 @@ export const authMiddleware = (req, res, next) => {
         const verified = jwt.verify(token, process.env.AUTH_SECRET);
 
         req.user = verified;
-
         next();
     } catch (err) {
         console.error("Authentication failed:", err);

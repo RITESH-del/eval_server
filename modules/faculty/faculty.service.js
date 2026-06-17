@@ -23,8 +23,16 @@ export const getLabDetails = async (examId) => {
         section: session.users?.section,
         language: session.submissions?.[0]?.language,
         status: session.status,
-        manual_score: session.submissions?.[0]?.manual_score,
-        autograding_score: session.submissions?.[0]?.autograding_score,
+        graduation_year: session.users?.graduation_year,
+        start_time: session.exams?.start_time,
+        total_manual_score: session.submissions?.reduce(
+                (sum, sub) => sum + (sub.manual_score || 0),
+                0
+            ) || null,   
+        total_autograding_score: session.submissions?.reduce(
+                (sum, sub) => sum + (sub.autograding_score || 0),
+                0
+            ) || null,
         title: session.exams?.title,
     }));
 }
@@ -64,13 +72,15 @@ export const getSubmissionById = async (examId, sessionId) => {
       title: submission.question_bank.title,
       description: submission.question_bank.description,
       submission_history: [],
-      autograding_score: null,
-      manual_score: null,
+      autograding_score: submission.autograding_score,
+      manual_score: submission.manual_score,
     };
   }
 
     grouped[qid].submission_history.push({
         id: submission.id,
+        code: submission.submitted_code,
+        language: submission.language,
         created_at: submission.created_at,
     });
 
@@ -104,3 +114,35 @@ export const getMetaData = async () => {
       .sort()
   };
 };
+
+
+export const getSessions = async () => {
+    const res = await facultyRepo.getSessions();
+
+    let total_manual_score = 0;
+    let total_autograding_score = 0;
+
+    return res.map((session) => {
+        total_manual_score += session.submissions?.map((sub) => sub.manual_score);
+        total_autograding_score += session.submissions?.map((sub) => sub.autograding_score);
+
+        return {
+            session_id: session.id,
+            university_id: session.users?.university_id,
+            name: session.users?.name,
+            section: session.users?.section,
+            language: session.submissions?.[0]?.language,
+            status: session.status,
+            total_manual_score: session.submissions?.reduce(
+                (sum, sub) => sum + (sub.manual_score || 0),
+                0
+            ) || null,   
+            total_autograding_score: session.submissions?.reduce(
+                (sum, sub) => sum + (sub.autograding_score || 0),
+                0
+            ),
+            title: session.exams?.title,
+            status: session.status,
+        }
+    })
+}

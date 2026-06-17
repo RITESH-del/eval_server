@@ -66,9 +66,9 @@ export const login = async ({ email, password }) => {
   const token = generateToken(user);
 
   // for testing
-  const decoded = jwt.decode(token);
-  console.log(decoded);
-  console.log("Lifetime:", decoded.exp - decoded.iat);
+  // const decoded = jwt.decode(token);
+  // console.log(decoded);
+  // console.log("Lifetime:", decoded.exp - decoded.iat);
 
 
   return {

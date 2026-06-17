@@ -105,4 +105,15 @@ export const sections = async () => await prisma.users.findMany({
   }
 });
 
+// build repository for exam sessions
+export const getSessions = async () => {
+  return await prisma.student_exam_sessions.findMany({
+    include: {
+      users: true,
+      exams: true,
+      submissions: true
+    }
+  })
+}
+
 

@@ -55,3 +55,12 @@ export const getMetaData = async (req, res, next) => {
     next(err);
   }
 }
+
+export const getSessions = async (req, res, next) => {
+  try {
+    const sessions = await facultyService.getSessions();
+    res.json(sessions);
+  } catch (err) {
+    next(err);
+  }
+}
