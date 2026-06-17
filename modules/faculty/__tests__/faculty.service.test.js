@@ -54,8 +54,16 @@ describe("Faculty Service", () => {
   describe("getLabs", () => {
     it("should return labs for a faculty member", async () => {
       const labs = [
-        { id: "exam-1", title: "Lab 1" },
-        { id: "exam-2", title: "Lab 2" },
+        {
+          id: "exam-1",
+          title: "Lab 1",
+          exam_target_sections: [{ section: "A" }, { section: "B" }],
+        },
+        {
+          id: "exam-2",
+          title: "Lab 2",
+          exam_target_sections: [],
+        },
       ];
 
       facultyRepo.getLabs.mockResolvedValue(labs);
@@ -66,7 +74,10 @@ describe("Faculty Service", () => {
         "faculty-id-1"
       );
 
-      expect(result).toEqual(labs);
+      expect(result).toEqual([
+        { id: "exam-1", title: "Lab 1", target_section: "A, B" },
+        { id: "exam-2", title: "Lab 2", target_section: "" },
+      ]);
     });
 
     it("should return empty array when no labs exist", async () => {

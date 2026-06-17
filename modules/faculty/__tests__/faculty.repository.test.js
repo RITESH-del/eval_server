@@ -79,6 +79,7 @@ describe("Faculty Repository", () => {
 
       expect(mockExamsFindMany).toHaveBeenCalledWith({
         where: { created_by: "faculty-id-1" },
+        include: { exam_target_sections: true },
       });
 
       expect(result).toEqual(exams);
@@ -112,7 +113,11 @@ describe("Faculty Repository", () => {
         where: { exam_id: "exam-1" },
         include: {
           users: true,
-          exams: true,
+          exams: {
+            include: {
+              exam_target_sections: true,
+            },
+          },
           submissions: true,
         },
       });

@@ -10,7 +10,15 @@ export const createLab = async (examData, facultyId) => {
 }
 
 export const getLabs = async (facultyId) => {
-    return await facultyRepo.getLabs(facultyId)  
+    const labs = await facultyRepo.getLabs(facultyId);
+    return labs.map(lab => {
+        const sections = lab.exam_target_sections?.map(s => s.section) || [];
+        const { exam_target_sections, ...labData } = lab;
+        return {
+            ...labData,
+            target_section: sections.join(", ")
+        };
+    });
 }
 
 export const getLabDetails = async (examId) => {

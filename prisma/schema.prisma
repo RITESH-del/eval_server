@@ -25,20 +25,21 @@ model exams {
   start_password_hash    String                  @db.VarChar(255)
   is_active              Boolean?                @default(false)
   is_live                Boolean?                @default(false)
+  result_published       Boolean?                @default(false)
   total_marks            Int
   duration_minutes       Int
   target_graduation_year Int
-  target_section         String                  @db.VarChar(10)
   start_time             DateTime                @db.Timestamp(0)
   end_time               DateTime                @db.Timestamp(0)
   created_by             String?                 @db.VarChar(36)
   created_at             DateTime?               @default(now()) @db.Timestamp(0)
   exam_questions         exam_questions[]
+  exam_target_sections   exam_target_sections[]
   users                  users?                  @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_exams_created_by")
   student_exam_sessions  student_exam_sessions[]
 
   @@index([created_by], map: "fk_exams_created_by")
-  @@index([target_graduation_year, target_section, is_live, is_active], map: "idx_exams_live_targeting")
+  @@index([target_graduation_year, is_live, is_active], map: "idx_exams_live_targeting")
 }
 
 model question_bank {
@@ -116,6 +117,15 @@ model users {
   exams                 exams[]
   question_bank         question_bank[]
   student_exam_sessions student_exam_sessions[]
+}
+
+model exam_target_sections {
+  exam_id String @db.Char(36)
+  section String @db.VarChar(10)
+  exams   exams  @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ets_exam_id")
+
+  @@id([exam_id, section])
+  @@index([section], map: "idx_ets_section")
 }
 
 enum student_exam_sessions_status {

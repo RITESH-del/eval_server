@@ -2,16 +2,38 @@ import prisma from "../../db.js";
 import { randomUUID } from "crypto";
 
 export const createLab = (exam, facultyId) => {
-    return prisma.exams.create({ data: {
+    const { target_section, ...examData } = exam;
+
+    let sections = [];
+    if (Array.isArray(target_section)) {
+        sections = target_section;
+    } else if (typeof target_section === "string") {
+        sections = target_section.split(",").map(s => s.trim()).filter(Boolean);
+    }
+
+    const dataToCreate = {
         id: randomUUID(),
-        ...exam
-    } })
+        ...examData
+    };
+
+    if (sections.length > 0) {
+        dataToCreate.exam_target_sections = {
+            create: sections.map(sec => ({
+                section: sec
+            }))
+        };
+    }
+
+    return prisma.exams.create({ data: dataToCreate });
 }
 
 export const getLabs = (facultyId) => {
     return prisma.exams.findMany({
         where: {
             created_by: facultyId
+        },
+        include: {
+            exam_target_sections: true
         }
     })
 }
@@ -24,7 +46,11 @@ export const getLabDetails = (examId) => {
         },
         include: {
           users: true,
-          exams: true,
+          exams: {
+              include: {
+                  exam_target_sections: true
+              }
+          },
           submissions: true
         }
     })
@@ -32,14 +58,32 @@ export const getLabDetails = (examId) => {
 
 // use it later 
 export const updateLab = (examId, examData) => {
+    const { target_section, ...otherData } = examData;
+
+    let sections = [];
+    if (Array.isArray(target_section)) {
+        sections = target_section;
+    } else if (typeof target_section === "string") {
+        sections = target_section.split(",").map(s => s.trim()).filter(Boolean);
+    }
+
+    const updateData = { ...otherData };
+
+    if (target_section !== undefined) {
+        updateData.exam_target_sections = {
+            deleteMany: {},
+            create: sections.map(sec => ({
+                section: sec
+            }))
+        };
+    }
+
     return prisma.exams.update({
         where: {
             id: examId
         },
-        data: {
-            ...examData
-        }
-    })
+        data: updateData
+    });
 }
 
 // may need later

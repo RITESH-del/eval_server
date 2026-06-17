@@ -6,7 +6,7 @@ const labBaseSchema = z.object({
   total_marks: z.number().positive("Total marks must be positive"),
   duration_minutes: z.number().positive("Duration must be positive"),
   target_graduation_year: z.number().int().min(2020).max(2100),
-  target_section: z.string().length(10),
+  target_section: z.union([z.string().max(10), z.array(z.string().max(10))]),
   start_time: z.coerce.date(),
   end_time: z.coerce.date(),
 });
