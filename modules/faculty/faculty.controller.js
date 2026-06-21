@@ -1,23 +1,15 @@
 import * as facultyService from './faculty.service.js'; 
 
-
-export const createLab = async (req, res, next) => {
-  try {
-    const exam = await facultyService.createLab(req.validatedData, req.user.id);
-    res.status(201).json(exam);
-  } catch (err) {
-    next(err);
-  }
-}
-
 export const getLabs = async (req, res, next) => {
   try {
-    const exams = await facultyService.getLabs(req.user.id);
-    res.json(exams);    
+
+    const labs = await facultyService.getLabs(req.user.id);
+    res.status(200).json(labs);    
   } catch (err) {
     next(err);
   }
 }
+
 
 export const getLabDetails = async (req, res, next) => {
   try {
@@ -64,3 +56,61 @@ export const getSessions = async (req, res, next) => {
     next(err);
   }
 }
+
+// faculty.controller.js
+
+export const createLab = async (req, res, next) => {
+  try {
+    const lab = await facultyService.createLab(
+      req.user.id,
+      req.validatedData
+    );
+
+    res.status(201).json(lab);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateLab = async (req, res, next) => {
+  try {
+    const lab = await facultyService.updateLab(
+      req.params.id,
+      req.user.id,
+      req.validatedData
+    );
+
+    res.json({
+      success: true,
+      data: lab,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteLab = async (req, res, next) => {
+  try {
+    await facultyService.deleteLab(
+      req.params.id,
+      req.user.id
+    );
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const fetchLab = async (req, res, next) => {
+  try {
+    const labs = await facultyService.fetchLab(req.params.id);
+    res.json(labs);
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+
+

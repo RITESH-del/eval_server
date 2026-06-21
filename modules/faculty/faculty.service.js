@@ -1,13 +1,14 @@
 import * as facultyRepo from "./faculty.repository.js";
+import { randomUUID } from "crypto";
 
-export const createLab = async (examData, facultyId) => {
-        await facultyRepo.createLab({
-            ...examData,
-            created_by: facultyId
-        })  
+// export const createLab = async (examData, facultyId) => {
+//         await facultyRepo.createLab({
+//             ...examData,
+//             created_by: facultyId
+//         })  
 
-        return "Exam created successfully";
-}
+//         return "Exam created successfully";
+// }
 
 export const getLabs = async (facultyId) => {
     const labs = await facultyRepo.getLabs(facultyId);
@@ -154,3 +155,105 @@ export const getSessions = async () => {
         }
     })
 }
+
+
+export const fetchLab = async (labId) => {
+  const lab = await facultyRepo.fetchLabById(labId);
+
+  return {
+    id: lab.id,
+    title: lab.title,
+    totalMarks: lab.total_marks,
+    durationMinutes: lab.duration_minutes,
+    targetGraduationYear: lab.target_graduation_year,
+    startTime: lab.start_time,
+    endTime: lab.end_time,
+    isActive: lab.is_active,
+    isLive: lab.is_live,
+    targetSections: lab.exam_target_sections.map((s) => s.section),
+    questions: lab.exam_questions.map((q) => {
+        return {
+            id: q.question_id,
+            type: null,
+            title: q.question_bank.title,
+            statement: q.question_bank.description,
+            marks: q.marks_weightage,
+            diagram: null,
+            testCases: q.question_bank.test_cases.map(t => {
+                return {
+                    id: t.id,
+                    input: t.input,
+                    output: t.expected_output,
+                    is_hidden:t.is_hidden
+                }
+            })
+
+        }
+    })
+  };
+};
+
+export const createLab = async (facultyId, data) => {
+  const examId = randomUUID();
+
+  return facultyRepo.createLab({
+    id: examId,
+    title: data.title,
+    start_password_hash: data.startPassword || "password", // temporary password
+    total_marks: data.totalMarks,
+    duration_minutes: data.duration,
+    target_graduation_year: Number(data.targetYears[0]),
+    start_time: data.start_time,
+    end_time: data.end_time,
+    created_by: facultyId,
+    sections: data.targetSections,
+    questions: data.questions.map((question) => ({
+      id: question.id,
+      title: question.statement.substring(0, 100),
+      statement: question.statement,
+      marks: question.marks,
+      difficulty: "medium",
+      subject_tag: data.subject,
+      testCases: question.testCases.map(testCase => ({
+        id: testCase.id,
+        input_data: testCase.input,
+        expected_output: testCase.output,
+        is_hidden: testCase.is_hidden || true
+      })),
+    })),
+  });
+};
+
+
+export const updateLab = async (labId, facultyId, data) => {
+  const existingLab = await facultyRepo.findLabById(labId);
+
+  if (!existingLab) {
+    throw new NotFoundError("Lab not found");
+  }
+
+  if (existingLab.created_by !== facultyId) {
+    throw new ForbiddenError("Not authorized");
+  }
+
+  return facultyRepo.updateLab(labId, data);
+};
+
+
+
+export const deleteLab = async (labId, facultyId) => {
+  const existingLab = await facultyRepo.findLabById(labId);
+
+  if (!existingLab) {
+    throw new NotFoundError("Lab not found");
+  }
+
+  if (existingLab.created_by !== facultyId) {
+    throw new ForbiddenError("Not authorized");
+  }
+
+  await facultyRepository.deleteLab(labId);
+};
+
+
+
