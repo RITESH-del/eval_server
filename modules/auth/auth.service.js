@@ -26,7 +26,7 @@ const generateToken = (user) => {
 function determineRole(email) {
    const localPart = email.split("@")[0];
    const studentPattern = /\.\d{2}[a-z]{2,4}$/i; // checks patterns like 24cse, 23ece, or 25me etc
-
+                      //shivesh.kumar.24cse@bmu.edu.in
   if (studentPattern.test(localPart)) {
     return "student";
   }

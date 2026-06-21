@@ -8,6 +8,9 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import facultyRoutes from "./modules/faculty/faculty.routes.js";
 import config from "./config/app.config.js";
 
+// 1. Import your Prisma connection
+import prisma from "./db.js"; 
+
 const app = new express();
 
 app.use(cors({
@@ -21,23 +24,6 @@ app.use(cors({
 // app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
-
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: false
-//   })
-// );
-
-// passport.serializeUser(
-//   (user, done) => done(null, user)
-// );
-
-// passport.deserializeUser(
-//   (user, done) => done(null, user)
-// );
-
 
 // application-level-routes
 app.use('/auth', authRoutes);
@@ -53,8 +39,19 @@ app.use((err, req, res, next) => {
   });
 });
 
+// 2. Test Prisma Connection, THEN start the server
 if (config.node_env !== 'test') {
-  app.listen(config.port, () => {
-    console.log(`Server listening at http://localhost:${config.port}`);
-  });
+  prisma.$connect()
+    .then(() => {
+      console.log("Database connection successful!");
+      
+      // Start the Express server only after DB connects
+      app.listen(config.port, () => {
+        console.log(`Server listening at http://localhost:${config.port}`);
+      });
+    })
+    .catch((error) => {
+      console.error("Database connection failed:", error);
+      process.exit(1); // Stop the server if the database fails
+    });
 }
