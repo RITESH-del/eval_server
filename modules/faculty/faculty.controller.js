@@ -66,7 +66,7 @@ export const createLab = async (req, res, next) => {
       req.validatedData
     );
 
-    res.status(201).json(lab);
+    res.status(200).json(lab);
   } catch (err) {
     next(err);
   }
@@ -76,7 +76,6 @@ export const updateLab = async (req, res, next) => {
   try {
     const lab = await facultyService.updateLab(
       req.params.id,
-      req.user.id,
       req.validatedData
     );
 

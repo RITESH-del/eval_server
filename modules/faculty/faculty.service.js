@@ -163,14 +163,14 @@ export const fetchLab = async (labId) => {
   return {
     id: lab.id,
     title: lab.title,
-    totalMarks: lab.total_marks,
-    durationMinutes: lab.duration_minutes,
-    targetGraduationYear: lab.target_graduation_year,
-    startTime: lab.start_time,
-    endTime: lab.end_time,
-    isActive: lab.is_active,
-    isLive: lab.is_live,
-    targetSections: lab.exam_target_sections.map((s) => s.section),
+    total_marks: lab.total_marks,
+    duration_minutes: lab.duration_minutes,
+    target_graduation_year: lab.target_graduation_year,
+    start_time: lab.start_time,
+    end_time: lab.end_time,
+    is_active: lab.is_active,
+    is_live: lab.is_live,
+    target_sections: lab.exam_target_sections.map((s) => s.section),
     questions: lab.exam_questions.map((q) => {
         return {
             id: q.question_id,
@@ -182,9 +182,9 @@ export const fetchLab = async (labId) => {
             testCases: q.question_bank.test_cases.map(t => {
                 return {
                     id: t.id,
-                    input: t.input,
+                    input: t.input_data,
                     output: t.expected_output,
-                    is_hidden:t.is_hidden
+                    is_hidden: t.is_hidden
                 }
             })
 
@@ -200,24 +200,24 @@ export const createLab = async (facultyId, data) => {
     id: examId,
     title: data.title,
     start_password_hash: data.startPassword || "password", // temporary password
-    total_marks: data.totalMarks,
-    duration_minutes: data.duration,
-    target_graduation_year: Number(data.targetYears[0]),
+    total_marks: data.total_marks,
+    duration_minutes: data.duration_minutes,
+    target_graduation_year: data.target_graduation_year,
     start_time: data.start_time,
     end_time: data.end_time,
     created_by: facultyId,
-    sections: data.targetSections,
+    sections: data.target_sections,
     questions: data.questions.map((question) => ({
       id: question.id,
-      title: question.statement.substring(0, 100),
+      title: question.title || "test",
       statement: question.statement,
       marks: question.marks,
       difficulty: "medium",
-      subject_tag: data.subject,
+      subject_tag: data.subject || "test",
       testCases: question.testCases.map(testCase => ({
         id: testCase.id,
-        input_data: testCase.input,
-        expected_output: testCase.output,
+        input_data: testCase.input_data,
+        expected_output: testCase.expected_output,
         is_hidden: testCase.is_hidden || true
       })),
     })),
@@ -225,16 +225,16 @@ export const createLab = async (facultyId, data) => {
 };
 
 
-export const updateLab = async (labId, facultyId, data) => {
+export const updateLab = async (labId, data) => {
   const existingLab = await facultyRepo.findLabById(labId);
 
   if (!existingLab) {
     throw new NotFoundError("Lab not found");
   }
 
-  if (existingLab.created_by !== facultyId) {
-    throw new ForbiddenError("Not authorized");
-  }
+  // if (existingLab.created_by !== facultyId) {
+  //   throw new ForbiddenError("Not authorized");
+  // }
 
   return facultyRepo.updateLab(labId, data);
 };

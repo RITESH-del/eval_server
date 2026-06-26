@@ -202,9 +202,9 @@ export const createLab = async (data) => {
     async (tx) => {
     const exam = await tx.exams.create({
       data: {
-        id: data.id,
+        id: data.id ?? randomUUID(),
         title: data.title,
-        start_password_hash: data.start_password_hash,
+        start_password_hash: data.start_password_hash || "test",
         total_marks: data.total_marks,
         duration_minutes: data.duration_minutes,
         target_graduation_year: data.target_graduation_year,
@@ -232,11 +232,11 @@ export const createLab = async (data) => {
         await tx.question_bank.create({
           data: {
             id: questionId,
-            title: question.title,
+            title: question.title || "test",
             description: question.statement,
-            subject_tag: question.subject_tag || "DSA",
-            difficulty: question.difficulty || "medium",
-            created_by: data.created_by,
+            subject_tag: question.subject_tag || "test",
+            difficulty: question.difficulty || "test",
+            // created_by: data.created_by,
           },
         });
 
@@ -268,65 +268,84 @@ export const createLab = async (data) => {
 
 
 export const updateLab = async (labId, data) => {
-  return prisma.$transaction(async (tx) => {
-    await tx.exams.update({
-      where: { id: labId },
-      data: {
-        title: data.title,
-        total_marks: data.totalMarks,
-        duration_minutes: data.duration,
-        target_graduation_year: Number(data.targetYears[0]),
-        start_time: data.startTime,
-        end_time: data.endTime,
-      },
-    });
-
-    await tx.exam_target_sections.deleteMany({
-      where: { exam_id: labId },
-    });
-
-    await tx.exam_questions.deleteMany({
-      where: { exam_id: labId },
-    });
-
-    if (data.targetSections?.length) {
-      await tx.exam_target_sections.createMany({
-        data: data.targetSections.map((section) => ({
-          exam_id: labId,
-          section,
-        })),
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.exams.update({
+        where: { id: labId },
+        data: {
+          title: data.title,
+          total_marks: data.totalMarks,
+          duration_minutes: data.duration,
+          target_graduation_year: data.target_graduation_year,
+          start_time: data.startTime,
+          end_time: data.endTime,
+        },
       });
-    }
 
-//     if (data.questions?.length) {
-//     await tx.question_bank.deleteMany({
-//   where: {
-//     id: {
-//       in: oldQuestions.map((q) => q.question_id),
-//     },
-//   },
-// });}
-
-    if (data.questions?.length) {
-      await tx.exam_questions.createMany({
-        data: data.questions.map((q) => ({
-          exam_id: labId,
-          question_id: q.id,
-          marks_weightage: q.marks,
-        })),
+      await tx.exam_target_sections.deleteMany({
+        where: { exam_id: labId },
       });
-    }
 
-    return tx.exams.findUnique({
-      where: { id: labId },
-      include: {
-        exam_target_sections: true,
-        exam_questions: true,
-      },
-    });
-  }, {
-    timeout: 30000,
+      await tx.exam_questions.deleteMany({
+        where: { exam_id: labId },
+      });
+
+      for (const q of data.questions) {
+  const existingQuestion = await tx.question_bank.findUnique({
+    where: {
+      id: q.id,
+    },
   });
+
+  if (!existingQuestion) {
+    await tx.question_bank.create({
+      data: {
+        id: q.id,
+        title: q.title || 'test',
+        description: q.statement,
+        subject_tag: q.subject_tag || 'test',
+        difficulty: q.difficulty || 'easy',
+        // created_by: data.created_by,
+      },
+    });
+  }
+}
+
+      if (data.target_sections?.length) {
+        await tx.exam_target_sections.createMany({
+          data: data.target_sections.map((section) => ({
+            exam_id: labId,
+            section,
+          })),
+        });
+      }
+
+      if (data.questions?.length) {
+        await tx.exam_questions.createMany({
+          data: data.questions.map((q) => ({
+            exam_id: labId,
+            question_id: q.id,
+            marks_weightage: q.marks,
+          })),
+        });
+      }
+
+      return tx.exams.findUnique({
+        where: { id: labId },
+        include: {
+          exam_target_sections: true,
+          exam_questions: {
+            include: {
+              question_bank: true,
+            },
+          },
+        },
+      });
+    },
+    {
+      timeout: 30000,
+    }
+  );
 };
 
 export const deleteLab = async (labId) => {

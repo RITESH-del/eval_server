@@ -7,6 +7,7 @@ import userRoutes from "./modules/users/user.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import facultyRoutes from "./modules/faculty/faculty.routes.js";
 import config from "./config/app.config.js";
+import { rateLimit } from 'express-rate-limit';
 import prisma from './db.js';
 
 const app = new express();
@@ -38,6 +39,11 @@ const swaggerSpec = {
   apis: ['./modules/**/*.routes.js']
 }
 
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 100,
+})
+
 /* Global Middleware */
 app.use(cors({
     origin: [
@@ -47,18 +53,9 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
-app.use(
-    '/api-docs',
-    swaggerUI.serve,
-    swaggerUI.setup(swaggerJSdoc(swaggerSpec))
-)
+app.use(limiter);
+app.use('/api-docs', swaggerUI.serve,  swaggerUI.setup(swaggerJSdoc(swaggerSpec)));
 
-
-app.use(
-    '/api-docs',
-    swaggerUI.serve,
-    swaggerUI.setup(swaggerJSdoc(swaggerSpec))
-)
 
 const ui = `
 <style>

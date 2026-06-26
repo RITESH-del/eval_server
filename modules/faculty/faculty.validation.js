@@ -1,30 +1,18 @@
 import { z } from 'zod';
 
-// const labBaseSchema = z.object({
-//   title: z.string().min(3).max(255),
-//   start_password_hash: z.string().min(3).max(255),
-//   total_marks: z.number().positive("Total marks must be positive"),
-//   duration_minutes: z.number().positive("Duration must be positive"),
-//   target_graduation_year: z.number().int().min(2020).max(2100),
-//   target_section: z.union([z.string().max(10), z.array(z.string().max(10))]),
-//   start_time: z.coerce.date(),
-//   end_time: z.coerce.date(),
-// });
-
 export const createLabSchema = z.object({
   id: z.string().nullish(),
   title: z.string().max(255),
-  subject: z.string().max(255),
-  duration: z.number().positive("duration must be positive"),
-  totalMarks: z.number().positive("total marks must be positive"),
-  targetYears: z.array(z.string().max(10)),
-  targetSections: z.array(z.string().max(10)),
+  subject: z.string().max(255).optional(),
+  duration_minutes: z.number().positive("duration must be positive"),
+  total_marks: z.number().positive("total marks must be positive"),
+  target_graduation_year: z.number().int().min(2020).max(2100),
+  target_sections: z.array(z.string().max(10)),
   start_time: z.coerce.date(),
   end_time: z.coerce.date(),
   questions: z.array(
     z.object({
       id: z.string(),
-      // type: z.enum(["coding", "subjective"]).nullish(),
       statement: z.string(),
       marks: z.number().positive("marks must be positive"),
       diagram: z.string().nullable().optional(),
