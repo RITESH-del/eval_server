@@ -197,14 +197,112 @@ export const fetchLabById = async(examId) => {
 }
 
 
+// export const createLab = async (facultyId, data) => {
+//   if (!facultyId) {
+//     throw new Error("facultyId is required");
+//   }
+
+//   if (!data) {
+//     throw new Error("data is required");
+//   }
+
+//   const examId = data.id || randomUUID();
+
+//   return prisma.$transaction(async (tx) => {
+//     console.log("Creating exam...");
+
+//     const exam = await tx.exams.create({
+//       data: {
+//         id: examId,
+//         title: data.title,
+//         start_password_hash: data.start_password,
+//         total_marks: data.total_marks,
+//         duration_minutes: data.duration_minutes,
+//         target_graduation_year: data.target_graduation_year,
+//         start_time: data.start_time,
+//         end_time: data.end_time,
+//         created_by: facultyId,
+//       },
+//     });
+
+//     console.log("Exam created:", exam.id);
+
+//     if (Array.isArray(data.target_sections) && data.target_sections.length) {
+//       console.log("Creating sections");
+
+//       await tx.exam_target_sections.createMany({
+//         data: data.target_sections.map((section) => ({
+//           exam_id: exam.id,
+//           section,
+//         })),
+//       });
+
+//       console.log("Sections created");
+//     }
+
+//     if (Array.isArray(data.questions)) {
+//       for (const question of data.questions) {
+//         console.log("Creating question:", question.id);
+
+//         const questionId = question.id || randomUUID();
+
+//         await tx.question_bank.create({
+//           data: {
+//             id: questionId,
+//             title: question.title,
+//             description: question.statement,
+//             subject_tag: question.subject_tag || "test",
+//             difficulty: question.difficulty,
+//             created_by: facultyId,
+//           },
+//         });
+
+//         console.log("Question created");
+
+//         if (Array.isArray(question.testCases) && question.testCases.length) {
+//           console.log("Creating test cases");
+
+//           await tx.test_cases.createMany({
+//             data: question.testCases.map((tc) => ({
+//               id: tc.id || randomUUID(),
+//               question_id: questionId,
+//               input_data: tc.input,
+//               expected_output: tc.output,
+//               is_hidden: true,
+//             })),
+//           });
+
+//           console.log("Test cases created");
+//         }
+
+//         console.log("Creating exam-question mapping");
+
+//         await tx.exam_questions.create({
+//           data: {
+//             exam_id: exam.id,
+//             question_id: questionId,
+//             marks_weightage: question.marks,
+//           },
+//         });
+
+//         console.log("Mapping created");
+//       }
+//     }
+
+//     return exam;
+//   });
+// };
+
+
+
 export const createLab = async (data) => {
-  return prisma.$transaction(
-    async (tx) => {
+  return prisma.$transaction(async (tx) => {
+    // Create Exam
     const exam = await tx.exams.create({
       data: {
-        id: data.id ?? randomUUID(),
+        id: data.id,
         title: data.title,
-        start_password_hash: data.start_password_hash || "test",
+        start_password_hash: data.start_password,
         total_marks: data.total_marks,
         duration_minutes: data.duration_minutes,
         target_graduation_year: data.target_graduation_year,
@@ -214,56 +312,56 @@ export const createLab = async (data) => {
       },
     });
 
-    // Sections
-    if (data.sections?.length) {
+    // Target Sections
+    if (data.target_sections.length) {
       await tx.exam_target_sections.createMany({
-        data: data.sections.map((section) => ({
+        data: data.target_sections.map((section) => ({
           exam_id: exam.id,
           section,
         })),
       });
     }
 
-    // Questions + Test Cases + Exam Mapping
-    if (data.questions?.length) {
-      for (const question of data.questions) {
-        const questionId = question.id || randomUUID();
+    // Questions
+    for (const question of data.questions) {
+      await tx.question_bank.create({
+        data: {
+          id: question.id,
+          title: question.title,
+          description: question.statement,
+          subject_tag: question.subject_tag,
+          difficulty: question.difficulty,
+          created_by: data.created_by,
+        },
+      });
 
-        await tx.question_bank.create({
-          data: {
-            id: questionId,
-            title: question.title || "test",
-            description: question.statement,
-            subject_tag: question.subject_tag || "test",
-            difficulty: question.difficulty || "test",
-            // created_by: data.created_by,
-          },
-        });
-
-        if (question.testCases?.length) {
-          await tx.test_cases.createMany({
-            data: question.testCases.map((tc) => ({
-              id: tc.id,
-              question_id: questionId,
-              input_data: tc.input_data,
-              expected_output: tc.expected_output,
-              is_hidden: true,
-            })),
-          });
-        }
-
-        await tx.exam_questions.create({
-          data: {
-            exam_id: exam.id,
-            question_id: questionId,
-            marks_weightage: question.marks,
-          },
+      // Test Cases
+      if (question.testCases.length) {
+        await tx.test_cases.createMany({
+          data: question.testCases.map((tc) => ({
+            id: tc.id,
+            question_id: question.id,
+            input_data: tc.input,
+            expected_output: tc.output,
+            is_hidden: true,
+          })),
         });
       }
+
+      // Exam Question Mapping
+      await tx.exam_questions.create({
+        data: {
+          exam_id: exam.id,
+          question_id: question.id,
+          marks_weightage: question.marks,
+        },
+      });
     }
 
     return exam;
-  },  {  maxWait: 5000, timeout: 30000 });
+  }, {
+    timeout: 30000
+  });
 };
 
 
@@ -274,11 +372,12 @@ export const updateLab = async (labId, data) => {
         where: { id: labId },
         data: {
           title: data.title,
-          total_marks: data.totalMarks,
-          duration_minutes: data.duration,
+          total_marks: data.total_marks,
+          start_password_hash: data.start_password,
+          duration_minutes: data.duration_minutes,
           target_graduation_year: data.target_graduation_year,
-          start_time: data.startTime,
-          end_time: data.endTime,
+          start_time: data.start_time,
+          end_time: data.end_time,
         },
       });
 
@@ -301,14 +400,27 @@ export const updateLab = async (labId, data) => {
     await tx.question_bank.create({
       data: {
         id: q.id,
-        title: q.title || 'test',
+        title: q.title,
         description: q.statement,
         subject_tag: q.subject_tag || 'test',
-        difficulty: q.difficulty || 'easy',
-        // created_by: data.created_by,
+        difficulty: q.difficulty,
+        created_by: data.created_by,
       },
     });
   }
+ else {
+  await tx.question_bank.update({
+    where: {
+      id: existingQuestion.id,
+    },
+    data: {
+      title: q.title,
+      description: q.statement,
+      subject_tag: q.subject_tag || "test",
+      difficulty: q.difficulty,
+    },
+  });
+}
 }
 
       if (data.target_sections?.length) {

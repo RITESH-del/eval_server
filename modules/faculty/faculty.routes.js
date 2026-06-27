@@ -16,7 +16,7 @@ router.get('/submissions/:examId/session/:sessionId', authMiddleware, allow('fac
 router.post('/labs', authMiddleware, allow('faculty'), validate(createLabSchema), facultyController.createLab); // create Lab
 router.get('/labs/:id', authMiddleware, allow('faculty'), facultyController.fetchLab); // fetch lab
 router.put('/labs/:id', authMiddleware, allow('faculty'), validate(updateLabSchema), facultyController.updateLab); // update lab 
-router.delete('labs/:id', authMiddleware, allow('faculty'), facultyController.deleteLab)
+router.delete('/labs/:id', authMiddleware, allow('faculty'), facultyController.deleteLab)
 
 
 router.get('/metadata', authMiddleware, allow('faculty'), facultyController.getMetaData); // for quizConfig.json

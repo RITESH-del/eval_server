@@ -11,6 +11,7 @@ export const authMiddleware = (req, res, next) => {
         const token = authHeader.split(' ')[1];
 
         const verified = jwt.verify(token, process.env.AUTH_SECRET);
+        console.log("Verified JWT:", verified);
 
         req.user = verified;
         next();

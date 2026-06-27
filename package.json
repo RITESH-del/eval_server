@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "postinstall": "prisma generate",
+    "profile": "node --prof ./index.js",
     "dev": "nodemon ./index.js",
     "start": "node ./index.js"
   },

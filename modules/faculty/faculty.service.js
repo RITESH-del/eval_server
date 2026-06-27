@@ -164,6 +164,7 @@ export const fetchLab = async (labId) => {
     id: lab.id,
     title: lab.title,
     total_marks: lab.total_marks,
+    start_password: lab.start_password_hash,
     duration_minutes: lab.duration_minutes,
     target_graduation_year: lab.target_graduation_year,
     start_time: lab.start_time,
@@ -178,6 +179,7 @@ export const fetchLab = async (labId) => {
             title: q.question_bank.title,
             statement: q.question_bank.description,
             marks: q.marks_weightage,
+            difficulty: q.question_bank.difficulty,
             diagram: null,
             testCases: q.question_bank.test_cases.map(t => {
                 return {
@@ -193,32 +195,68 @@ export const fetchLab = async (labId) => {
   };
 };
 
-export const createLab = async (facultyId, data) => {
-  const examId = randomUUID();
+// export const createLab = async (facultyId, data) => {
+//   const examId = randomUUID();
 
+//   return await facultyRepo.createLab({
+//     id: examId,
+//     title: data.title,
+//     start_password_hash: data.start_password,
+//     total_marks: data.total_marks,
+//     duration_minutes: data.duration_minutes,
+//     target_graduation_year: data.target_graduation_year,
+//     start_time: data.start_time,
+//     end_time: data.end_time,
+//     created_by: facultyId,
+//     sections: data.target_sections,
+//     questions: data.questions.map((question) => ({
+//       id: question.id,
+//       title: question.title,
+//       statement: question.statement,
+//       marks: question.marks,
+//       difficulty: question.difficulty,
+//       subject_tag: data.subject || "test",
+//       testCases: question.testCases.map(testCase => ({
+//         id: testCase.id,
+//         input_data: testCase.input_data,
+//         expected_output: testCase.expected_output,
+//         is_hidden: testCase.is_hidden || true
+//       })),
+//     })),
+//   });
+// };
+
+export const createLab = async (data) => {
   return facultyRepo.createLab({
-    id: examId,
+    id: data.id ?? randomUUID(),
+
     title: data.title,
-    start_password_hash: data.startPassword || "password", // temporary password
+    start_password: data.start_password,
     total_marks: data.total_marks,
     duration_minutes: data.duration_minutes,
+
     target_graduation_year: data.target_graduation_year,
+    target_sections: data.target_sections,
+
     start_time: data.start_time,
     end_time: data.end_time,
-    created_by: facultyId,
-    sections: data.target_sections,
-    questions: data.questions.map((question) => ({
-      id: question.id,
-      title: question.title || "test",
+
+    created_by: data.created_by,
+
+    questions: (data.questions ?? []).map((question) => ({
+      id: question.id ?? randomUUID(),
+
+      title: question.title,
       statement: question.statement,
+      difficulty: question.difficulty,
       marks: question.marks,
-      difficulty: "medium",
-      subject_tag: data.subject || "test",
-      testCases: question.testCases.map(testCase => ({
-        id: testCase.id,
-        input_data: testCase.input_data,
-        expected_output: testCase.expected_output,
-        is_hidden: testCase.is_hidden || true
+
+      subject_tag: data.subject ?? "test",
+
+      testCases: (question.testCases ?? []).map((tc) => ({
+        id: tc.id ?? randomUUID(),
+        input: tc.input,
+        output: tc.output,
       })),
     })),
   });
@@ -252,7 +290,7 @@ export const deleteLab = async (labId, facultyId) => {
     throw new ForbiddenError("Not authorized");
   }
 
-  await facultyRepository.deleteLab(labId);
+  await facultyRepo.deleteLab(labId);
 };
 
 

@@ -59,18 +59,33 @@ export const getSessions = async (req, res, next) => {
 
 // faculty.controller.js
 
+// export const createLab = async (req, res, next) => {
+//   try {
+//     const lab = await facultyService.createLab(
+//       req.user.id,
+//       req.validatedData
+//     );
+
+//     res.status(200).json(lab);
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+
 export const createLab = async (req, res, next) => {
   try {
-    const lab = await facultyService.createLab(
-      req.user.id,
-      req.validatedData
-    );
+    const lab = await facultyService.createLab({
+      ...req.validatedData,
+      created_by: req.user.id,
+    });
 
-    res.status(200).json(lab);
+    res.status(201).json(lab);
   } catch (err) {
     next(err);
   }
 };
+
 
 export const updateLab = async (req, res, next) => {
   try {
@@ -104,6 +119,7 @@ export const deleteLab = async (req, res, next) => {
 export const fetchLab = async (req, res, next) => {
   try {
     const labs = await facultyService.fetchLab(req.params.id);
+    console.log(labs);
     res.json(labs);
   } catch (err) {
     next(err);

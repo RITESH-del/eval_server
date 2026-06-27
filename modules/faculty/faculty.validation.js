@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 export const createLabSchema = z.object({
-  id: z.string().nullish(),
+  id: z.string().nullish().optional(),
   title: z.string().max(255),
   subject: z.string().max(255).optional(),
+  start_password: z.string().max(255).optional(),
   duration_minutes: z.number().positive("duration must be positive"),
   total_marks: z.number().positive("total marks must be positive"),
   target_graduation_year: z.number().int().min(2020).max(2100),
@@ -13,7 +14,9 @@ export const createLabSchema = z.object({
   questions: z.array(
     z.object({
       id: z.string(),
+      title: z.string().optional(),
       statement: z.string(),
+      difficulty: z.enum(["easy", "medium", "hard"]).optional(),
       marks: z.number().positive("marks must be positive"),
       diagram: z.string().nullable().optional(),
       testCases: z.array(
