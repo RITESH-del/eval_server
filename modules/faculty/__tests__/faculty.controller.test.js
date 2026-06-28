@@ -8,6 +8,9 @@ jest.unstable_mockModule("../faculty.service.js", () => ({
   getSubmissionById: jest.fn(),
   getMetaData: jest.fn(),
   getSessions: jest.fn(),
+  fetchLab: jest.fn(),
+  updateLab: jest.fn(),
+  deleteLab: jest.fn(),
 }));
 
 const facultyService = await import("../faculty.service.js");
@@ -21,7 +24,7 @@ describe("Faculty Controller", () => {
 
   describe("createLab", () => {
     it("should create a lab and return 201", async () => {
-      const mockResult = "Exam created successfully";
+      const mockResult = { id: "exam-1", title: "Test Lab" };
 
       facultyService.createLab.mockResolvedValue(mockResult);
 
@@ -44,10 +47,11 @@ describe("Faculty Controller", () => {
 
       await facultyController.createLab(req, res, next);
 
-      expect(facultyService.createLab).toHaveBeenCalledWith(
-        req.validatedData,
-        req.user.id
-      );
+      expect(facultyService.createLab).toHaveBeenCalledWith({
+        title: "Test Lab",
+        total_marks: 100,
+        created_by: "faculty-id-1",
+      });
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(mockResult);
@@ -90,6 +94,7 @@ describe("Faculty Controller", () => {
       };
 
       const res = {
+        status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       };
 
@@ -101,6 +106,7 @@ describe("Faculty Controller", () => {
         req.user.id
       );
 
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockLabs);
       expect(next).not.toHaveBeenCalled();
     });
@@ -372,6 +378,69 @@ describe("Faculty Controller", () => {
       await facultyController.getSessions(req, res, next);
 
       expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe("fetchLab", () => {
+    it("should fetch a lab and return it", async () => {
+      const mockLab = { id: "exam-1", title: "Fetched Lab" };
+      facultyService.fetchLab.mockResolvedValue(mockLab);
+
+      const req = { params: { id: "exam-1" } };
+      const res = { json: jest.fn() };
+      const next = jest.fn();
+
+      await facultyController.fetchLab(req, res, next);
+
+      expect(facultyService.fetchLab).toHaveBeenCalledWith("exam-1");
+      expect(res.json).toHaveBeenCalledWith(mockLab);
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("updateLab", () => {
+    it("should update a lab and return response status 200", async () => {
+      const mockUpdated = { id: "exam-1", title: "Updated Lab" };
+      facultyService.updateLab.mockResolvedValue(mockUpdated);
+
+      const req = {
+        params: { id: "exam-1" },
+        validatedData: { title: "Updated Lab" },
+      };
+      const res = { json: jest.fn() };
+      const next = jest.fn();
+
+      await facultyController.updateLab(req, res, next);
+
+      expect(facultyService.updateLab).toHaveBeenCalledWith("exam-1", req.validatedData);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockUpdated,
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deleteLab", () => {
+    it("should delete a lab and return status 204", async () => {
+      facultyService.deleteLab.mockResolvedValue();
+
+      const req = {
+        params: { id: "exam-1" },
+        user: { id: "faculty-1" },
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+      const next = jest.fn();
+
+      await facultyController.deleteLab(req, res, next);
+
+      expect(facultyService.deleteLab).toHaveBeenCalledWith("exam-1", "faculty-1");
+      expect(res.status).toHaveBeenCalledWith(204);
+      expect(res.send).toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
     });
   });
 });

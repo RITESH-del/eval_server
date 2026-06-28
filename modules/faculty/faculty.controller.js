@@ -57,21 +57,6 @@ export const getSessions = async (req, res, next) => {
   }
 }
 
-// faculty.controller.js
-
-// export const createLab = async (req, res, next) => {
-//   try {
-//     const lab = await facultyService.createLab(
-//       req.user.id,
-//       req.validatedData
-//     );
-
-//     res.status(200).json(lab);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 
 export const createLab = async (req, res, next) => {
   try {

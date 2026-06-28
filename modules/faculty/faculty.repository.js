@@ -1,32 +1,6 @@
 import prisma from "../../db.js";
 import { randomUUID } from "crypto";
 
-// export const createLab = (exam, facultyId) => {
-//     const { target_section, ...examData } = exam;
-
-//     let sections = [];
-//     if (Array.isArray(target_section)) {
-//         sections = target_section;
-//     } else if (typeof target_section === "string") {
-//         sections = target_section.split(",").map(s => s.trim()).filter(Boolean);
-//     }
-
-//     const dataToCreate = {
-//         id: randomUUID(),
-//         ...examData
-//     };
-
-//     if (sections.length > 0) {
-//         dataToCreate.exam_target_sections = {
-//             create: sections.map(sec => ({
-//                 section: sec
-//             }))
-//         };
-//     }
-
-//     return prisma.exams.create({ data: dataToCreate });
-// }
-
 export const getLabs = (facultyId) => {
     return prisma.exams.findMany({
         where: {
@@ -55,45 +29,6 @@ export const getLabDetails = (examId) => {
         }
     })
 }
-
-// use it later 
-// export const updateLab = (examId, examData) => {
-//     const { target_section, ...otherData } = examData;
-
-//     let sections = [];
-//     if (Array.isArray(target_section)) {
-//         sections = target_section;
-//     } else if (typeof target_section === "string") {
-//         sections = target_section.split(",").map(s => s.trim()).filter(Boolean);
-//     }
-
-//     const updateData = { ...otherData };
-
-//     if (target_section !== undefined) {
-//         updateData.exam_target_sections = {
-//             deleteMany: {},
-//             create: sections.map(sec => ({
-//                 section: sec
-//             }))
-//         };
-//     }
-
-//     return prisma.exams.update({
-//         where: {
-//             id: examId
-//         },
-//         data: updateData
-//     });
-// }
-
-// may need later
-// export const deleteLab = (examId) => {
-//     return prisma.exams.delete({
-//         where: {
-//             id: examId
-//         }
-//     })
-// }   
 
 
 

@@ -1,14 +1,31 @@
 import { jest } from "@jest/globals";
 
+const mockCreateLab = jest.fn();
+const mockGetLabs = jest.fn();
+const mockGetLabDetails = jest.fn();
+const mockGetAllSubmissions = jest.fn();
+const mockGetSubmissionById = jest.fn();
+const mockYears = jest.fn();
+const mockSections = jest.fn();
+const mockGetSessions = jest.fn();
+const mockFindLabById = jest.fn();
+const mockFetchLabById = jest.fn();
+const mockUpdateLab = jest.fn();
+const mockDeleteLab = jest.fn();
+
 jest.unstable_mockModule("../faculty.repository.js", () => ({
-  createLab: jest.fn(),
-  getLabs: jest.fn(),
-  getLabDetails: jest.fn(),
-  getAllSubmissions: jest.fn(),
-  getSubmissionById: jest.fn(),
-  years: jest.fn(),
-  sections: jest.fn(),
-  getSessions: jest.fn(),
+  createLab: mockCreateLab,
+  getLabs: mockGetLabs,
+  getLabDetails: mockGetLabDetails,
+  getAllSubmissions: mockGetAllSubmissions,
+  getSubmissionById: mockGetSubmissionById,
+  years: mockYears,
+  sections: mockSections,
+  getSessions: mockGetSessions,
+  findLabById: mockFindLabById,
+  fetchLabById: mockFetchLabById,
+  updateLab: mockUpdateLab,
+  deleteLab: mockDeleteLab,
 }));
 
 const facultyRepo = await import("../faculty.repository.js");
@@ -21,6 +38,9 @@ const {
   getSubmissionById,
   getMetaData,
   getSessions,
+  fetchLab,
+  updateLab,
+  deleteLab,
 } = await import("../faculty.service.js");
 
 describe("Faculty Service", () => {
@@ -29,25 +49,26 @@ describe("Faculty Service", () => {
   });
 
   describe("createLab", () => {
-    it("should create a lab and return success message", async () => {
-      facultyRepo.createLab.mockResolvedValue({
-        id: "exam-1",
-      });
+    it("should create a lab and return the created exam", async () => {
+      const mockExam = { id: "exam-1", title: "Test Lab" };
+      facultyRepo.createLab.mockResolvedValue(mockExam);
 
       const examData = {
         title: "Test Lab",
         total_marks: 100,
+        duration_minutes: 60,
+        target_graduation_year: 2026,
+        target_sections: ["A"],
+        start_time: new Date("2026-06-28T14:48:20.000Z"),
+        end_time: new Date("2026-06-28T16:48:20.000Z"),
+        created_by: "faculty-1",
+        questions: [],
       };
 
-      const result = await createLab(examData, "faculty-id-1");
+      const result = await createLab(examData);
 
-      expect(facultyRepo.createLab).toHaveBeenCalledWith({
-        title: "Test Lab",
-        total_marks: 100,
-        created_by: "faculty-id-1",
-      });
-
-      expect(result).toBe("Exam created successfully");
+      expect(facultyRepo.createLab).toHaveBeenCalled();
+      expect(result).toEqual(mockExam);
     });
   });
 
@@ -98,6 +119,7 @@ describe("Faculty Service", () => {
             university_id: "24CSE001",
             name: "John",
             section: "A",
+            graduation_year: 2026,
           },
           submissions: [
             {
@@ -113,6 +135,7 @@ describe("Faculty Service", () => {
           ],
           exams: {
             title: "Lab 1",
+            start_time: new Date("2026-06-28T14:48:20.000Z"),
           },
           status: "submitted",
         },
@@ -134,6 +157,8 @@ describe("Faculty Service", () => {
           section: "A",
           language: "python",
           status: "submitted",
+          graduation_year: 2026,
+          start_time: sessions[0].exams.start_time,
           total_manual_score: 150,
           total_autograding_score: 175,
           title: "Lab 1",
@@ -149,10 +174,12 @@ describe("Faculty Service", () => {
             university_id: "24CSE001",
             name: "John",
             section: "A",
+            graduation_year: 2026,
           },
           submissions: [],
           exams: {
             title: "Lab 1",
+            start_time: new Date("2026-06-28T14:48:20.000Z"),
           },
           status: "allocated",
         },
@@ -170,6 +197,8 @@ describe("Faculty Service", () => {
           section: "A",
           language: undefined,
           status: "allocated",
+          graduation_year: 2026,
+          start_time: sessions[0].exams.start_time,
           total_manual_score: null,
           total_autograding_score: null,
           title: "Lab 1",
@@ -314,7 +343,7 @@ describe("Faculty Service", () => {
       expect(facultyRepo.sections).toHaveBeenCalled();
 
       expect(result).toEqual({
-        target_graduation_year: [2024, 2025, 2026, 2027],
+        target_graduation_year: [2025, 2026, 2027, 2028],
         target_section: ["A", "B", "C"],
       });
     });
@@ -429,6 +458,108 @@ describe("Faculty Service", () => {
           title: "Lab 1",
         },
       ]);
+    });
+  });
+
+  describe("fetchLab", () => {
+    it("should fetch a lab by id and map questions and test cases correctly", async () => {
+      const mockRepoLab = {
+        id: "exam-1",
+        title: "Test Lab",
+        total_marks: 100,
+        start_password_hash: "hashedpass",
+        duration_minutes: 60,
+        target_graduation_year: 2026,
+        start_time: new Date("2026-06-28T14:48:20.000Z"),
+        end_time: new Date("2026-06-28T16:48:20.000Z"),
+        is_active: true,
+        is_live: true,
+        exam_target_sections: [{ section: "A" }],
+        exam_questions: [
+          {
+            question_id: "q-1",
+            marks_weightage: 20,
+            question_bank: {
+              title: "Q1",
+              description: "desc1",
+              difficulty: "easy",
+              test_cases: [
+                {
+                  id: "tc-1",
+                  input_data: "1",
+                  expected_output: "2",
+                  is_hidden: true,
+                }
+              ]
+            }
+          }
+        ]
+      };
+
+      facultyRepo.fetchLabById.mockResolvedValue(mockRepoLab);
+
+      const result = await fetchLab("exam-1");
+
+      expect(facultyRepo.fetchLabById).toHaveBeenCalledWith("exam-1");
+      expect(result).toEqual({
+        id: "exam-1",
+        title: "Test Lab",
+        total_marks: 100,
+        start_password: "hashedpass",
+        duration_minutes: 60,
+        target_graduation_year: 2026,
+        start_time: mockRepoLab.start_time,
+        end_time: mockRepoLab.end_time,
+        is_active: true,
+        is_live: true,
+        target_sections: ["A"],
+        questions: [
+          {
+            id: "q-1",
+            type: null,
+            title: "Q1",
+            statement: "desc1",
+            marks: 20,
+            difficulty: "easy",
+            diagram: null,
+            testCases: [
+              {
+                id: "tc-1",
+                input: "1",
+                output: "2",
+                is_hidden: true
+              }
+            ]
+          }
+        ]
+      });
+    });
+  });
+
+  describe("updateLab", () => {
+    it("should update a lab if it exists", async () => {
+      const mockLab = { id: "exam-1", created_by: "faculty-1" };
+      facultyRepo.findLabById.mockResolvedValue(mockLab);
+      facultyRepo.updateLab.mockResolvedValue({ id: "exam-1", title: "Updated" });
+
+      const result = await updateLab("exam-1", { title: "Updated" });
+
+      expect(facultyRepo.findLabById).toHaveBeenCalledWith("exam-1");
+      expect(facultyRepo.updateLab).toHaveBeenCalledWith("exam-1", { title: "Updated" });
+      expect(result).toEqual({ id: "exam-1", title: "Updated" });
+    });
+  });
+
+  describe("deleteLab", () => {
+    it("should delete a lab if it exists and belongs to the faculty", async () => {
+      const mockLab = { id: "exam-1", created_by: "faculty-1" };
+      facultyRepo.findLabById.mockResolvedValue(mockLab);
+      facultyRepo.deleteLab.mockResolvedValue();
+
+      await deleteLab("exam-1", "faculty-1");
+
+      expect(facultyRepo.findLabById).toHaveBeenCalledWith("exam-1");
+      expect(facultyRepo.deleteLab).toHaveBeenCalledWith("exam-1");
     });
   });
 });
