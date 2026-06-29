@@ -6,6 +6,8 @@ import swaggerJSdoc from 'swagger-jsdoc'
 import userRoutes from "./modules/users/user.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import facultyRoutes from "./modules/faculty/faculty.routes.js";
+import studentRoutes from "./modules/student/student.routes.js";
+import appRoutes from "./modules/app/app.routes.js";
 import config from "./config/app.config.js";
 import { rateLimit } from 'express-rate-limit';
 import prisma from './db.js';
@@ -79,6 +81,8 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/faculty', facultyRoutes);
+app.use('/student', studentRoutes);
+app.use('/app', appRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

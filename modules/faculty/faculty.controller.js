@@ -71,7 +71,6 @@ export const createLab = async (req, res, next) => {
   }
 };
 
-
 export const updateLab = async (req, res, next) => {
   try {
     const lab = await facultyService.updateLab(

@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { authMiddleware } from '../../shared/middleware/auth.middleware.js';
 import { allow } from '../../shared/middleware/RABC.middleware.js';
 import * as facultyController from './faculty.controller.js';
-import { validate, createLabSchema, updateLabSchema } from './faculty.validation.js';
-
+import { createLabSchema, updateLabSchema } from './faculty.validation.js';
+import { validate } from '../../shared/middleware/validate.middleware.js';
 const router = Router();
 
 /**
