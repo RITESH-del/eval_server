@@ -110,6 +110,24 @@ export const fetchLab = async (req, res, next) => {
   }
 }
 
+export const updateManualScore = async (req, res, next) => {
+  try {
+    const submission = await facultyService.updateManualScore(
+      req.params.submissionId,
+      req.body.manual_score
+    );
+    res.json(submission);
+  } catch (err) {
+    next(err);
+  }
+}
 
 
-
+export const publishResult = async (req, res, next) => {
+  try {
+    const result = await facultyService.publishResult(req.params.examId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}

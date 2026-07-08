@@ -1,14 +1,6 @@
 import * as facultyRepo from "./faculty.repository.js";
 import { randomUUID } from "crypto";
 
-// export const createLab = async (examData, facultyId) => {
-//         await facultyRepo.createLab({
-//             ...examData,
-//             created_by: facultyId
-//         })  
-
-//         return "Exam created successfully";
-// }
 
 export const getLabs = async (facultyId) => {
     const labs = await facultyRepo.getLabs(facultyId);
@@ -90,12 +82,10 @@ export const getSubmissionById = async (examId, sessionId) => {
         id: submission.id,
         code: submission.submitted_code,
         language: submission.language,
+        manual_score: submission.manual_score,
+        autograding_score: submission.autograding_score,
         created_at: submission.created_at,
     });
-
-    // latest scores overwrite older ones
-    grouped[qid].autograding_score = submission.autograding_score;
-    grouped[qid].manual_score = submission.manual_score;
     });
 
     response.responses = Object.values(grouped);
@@ -295,3 +285,11 @@ export const deleteLab = async (labId, facultyId) => {
 
 
 
+export const updateManualScore = async(submissionId, manualScore) =>{
+  return await facultyRepo.updateManualScore(submissionId, manualScore);
+}
+
+
+export const publishResult = async(examId) => {
+  return await facultyRepo.publishResult(examId);
+}

@@ -404,6 +404,43 @@ export const deleteLab = async (labId) => {
 };
 
 
+export const updateManualScore = async (
+  submissionId,
+  manualScore
+) => {
+  return await prisma.submissions.update({
+    where: {
+      id: submissionId,
+    },
+    data: {
+      manual_score: manualScore,
+    },
+  });
+};
 
 
 
+export const publishResult = async (examId) => {
+   const exam = await prisma.exams.findUnique({
+    where: {
+      id: examId,
+    },
+    select: {
+    result_published: true,
+  },
+  });
+
+  if (!exam) {
+    throw new Error("Exam not found");
+  }
+
+  return await prisma.exams.update({
+    where: {
+      id: examId
+    },
+    data: {
+      result_published: !exam.result_published,
+    }
+  })
+  
+}

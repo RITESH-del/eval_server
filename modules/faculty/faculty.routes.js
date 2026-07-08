@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '../../shared/middleware/auth.middleware.js';
 import { allow } from '../../shared/middleware/RABC.middleware.js';
 import * as facultyController from './faculty.controller.js';
-import { createLabSchema, updateLabSchema } from './faculty.validation.js';
+import { createLabSchema, updateLabSchema, manualScoreSchema } from './faculty.validation.js';
 import { validate } from '../../shared/middleware/validate.middleware.js';
 const router = Router();
 
@@ -610,5 +610,54 @@ router.delete('/labs/:id', authMiddleware, allow('faculty'), facultyController.d
  *         description: Forbidden
  */
 router.get('/metadata', authMiddleware, allow('faculty'), facultyController.getMetaData); // for quizConfig.json
+
+
+router.patch("/submissions/:submissionId/manual-score",  validate(manualScoreSchema), authMiddleware, allow('faculty'), facultyController.updateManualScore);
+
+/**
+ * @swagger
+ * /faculty/publish_result/{examId}:
+ *   post:
+ *     summary: Publish or unpublish exam results
+ *     tags: [Faculty]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Exam/Lab ID
+ *     responses:
+ *       200:
+ *         description: Results published/unpublished successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     exam_id:
+ *                       type: string
+ *                       example: "uuid-1234"
+ *                     result_published:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: Invalid request or exam not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Exam not found
+ */
+router.post("/publish_result/:examId", authMiddleware, allow('faculty'), facultyController.publishResult);
 
 export default router;

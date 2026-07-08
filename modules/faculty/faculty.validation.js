@@ -34,6 +34,10 @@ export const createLabSchema = z.object({
 
 export const updateLabSchema = createLabSchema;
 
+export const manualScoreSchema = z.object({
+  manual_score: z.number().positive("manual score must be positive"),
+});
+
 export const validate = (schema) => {
   return async (req, res, next) => {
     try {
