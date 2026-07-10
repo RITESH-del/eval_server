@@ -50,7 +50,7 @@ const limiter = rateLimit({
 app.use(cors({
     origin: [
         'http://localhost:5173',  
-        'https://eval-platform-ten.vercel.app/'  // add frontend production url later
+        'https://eval-platform-ten.vercel.app'  // add frontend production url later
     ],
     credentials: true
 }));
