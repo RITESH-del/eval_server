@@ -7,7 +7,6 @@ import * as authRepo from "./auth.repository.js";
 const googleClient = new OAuth2Client();
 
 
-/* ==================================Helper Functions starts=====================================*/
 const generateToken = (user) => {
   return jwt.sign(
     {
@@ -33,8 +32,6 @@ function determineRole(email) {
 
   return "faculty";
 }
-
-/* ==================================Helper Functions ends=====================================*/
 
 
 export const signup = async (data) => {
@@ -104,32 +101,4 @@ export const googleLogin = async (credential) => {
     accessToken,
   };
 };
-
-
-
-// export const ssoCallback = async (req, res) => {
-//     const profile = req.user;
-//     const oidcSub = profile.id; // OIDC unique id
-//     const email = profile.emails[0].value;
-//     const name = profile.displayName;
-
-//     let user = await authRepo.findByOidcSub(oidcSub);
-
-//     if (!user) {  
-//       const role = determineRole(email);
-//       user = await authRepo.create({ oidc_sub: oidcSub, email, name, role });
-//     }
-
-//     const token = generateToken(user);
-
-//     res.cookie( "token", token,
-//       {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: "lax"
-//       }
-//     );
-
-//     res.redirect(`${process.env.FRONTEND_URL}/auth/success`); // need to create a auth success page in frontend later
-// };
 

@@ -85,7 +85,7 @@ export const countStudentExams = (studentId) => {
     where: {
       student_id: studentId,
       exams: {
-        result_published: true,
+        result_published: false,
       },
     },
   });
@@ -103,10 +103,18 @@ export const getExamById = (examId, studentId) => {
     },
     select: {
       id: true,
+      status: true,
+      submitted_at: true,
       exams: {
         select: {
           title: true,
           total_marks: true,
+          exam_questions: {
+            select: {
+              question_id: true,
+              marks_weightage: true,
+            },
+          },
         },
       },
       submissions: {
@@ -116,6 +124,7 @@ export const getExamById = (examId, studentId) => {
           submitted_code: true,
           language: true,
           autograding_score: true,
+          autograding_status: true,
           manual_score: true,
           created_at: true,
           question_bank: {
@@ -126,7 +135,7 @@ export const getExamById = (examId, studentId) => {
           },
         },
         orderBy: {
-          created_at: "asc",
+          created_at: "asc", // oldest -> newest, service.js relies on this order
         },
       },
     },

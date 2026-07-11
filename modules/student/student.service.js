@@ -146,9 +146,15 @@ export const getExamById = async (examId, studentId, studentDetails) => {
     throw err;
   }
 
-  // Use passed studentDetails instead of fetching from DB
+  // question_id -> marks_weightage, from exam_questions
+  const maxMarksMap = new Map(
+    (session.exams.exam_questions || []).map((eq) => [eq.question_id, eq.marks_weightage])
+  );
+
   const response = {
     session_id: session.id,
+    status: session.status,
+    submitted_at: session.submitted_at,
     student_details: {
       university_id: studentDetails.university_id,
       name: studentDetails.name,
@@ -164,7 +170,6 @@ export const getExamById = async (examId, studentId, studentDetails) => {
     responses: [],
   };
 
-  // Group submissions by question
   const grouped = {};
   session.submissions.forEach((submission) => {
     const qid = submission.question_id;
@@ -174,9 +179,8 @@ export const getExamById = async (examId, studentId, studentDetails) => {
         question_id: qid,
         title: submission.question_bank.title,
         description: submission.question_bank.description,
+        max_marks: maxMarksMap.get(qid) ?? null,
         submission_history: [],
-        autograding_score: submission.autograding_score,
-        manual_score: submission.manual_score,
       };
     }
 
@@ -185,14 +189,23 @@ export const getExamById = async (examId, studentId, studentDetails) => {
       code: submission.submitted_code,
       language: submission.language,
       created_at: submission.created_at,
+      autograding_score: submission.autograding_score,
+      autograding_status: submission.autograding_status,
+      manual_score: submission.manual_score,
     });
-
-    // Update with latest scores
-    grouped[qid].autograding_score = submission.autograding_score;
-    grouped[qid].manual_score = submission.manual_score;
   });
 
-  response.responses = Object.values(grouped);
+  // Attach latest attempt's scores/status as the "current" figures for the question
+  response.responses = Object.values(grouped).map((q) => {
+    const latest = q.submission_history[q.submission_history.length - 1];
+    return {
+      ...q,
+      autograding_score: latest?.autograding_score ?? 0,
+      manual_score: latest?.manual_score ?? null,
+      status: latest?.autograding_status ?? "pending",
+    };
+  });
+
   return response;
 };
 

@@ -36,7 +36,8 @@ flowchart TD
 
 ***Other Dependencies***
 * **Testing:** Jest, Supertest
-* **dev-dependencies:** nodemon, ESlint, globals
+* **dev-dependencies:** nodemon, ESlint, globals, @prisma/client
+* **api documentation:** swaggerui, swagger-jsdoc
 
 **Programming Language**
 * Node js
@@ -124,8 +125,11 @@ flowchart TD
 
 ## Modules and Responsibilities
 * auth - authenications and authorization(assigning roles to user based on email ID)
-* submissions - handles submissions made by user from App
+* app - handles submissions made by user from App and other app related routes.
 * student - for viewing results, performance analytics, upcoming examinations, and submission history.
 * faculty - for creating exam, exam management, reviewing results, monitoring exams, evaluation of results etc.
 * user - for retrieval of user-related information.
 
+
+**Github Link:** [https://github.com/RITESH-del/eval_server](https://github.com/RITESH-del/eval_server)
+**Render Link:** [https://eval-server-bkzt.onrender.com](https://eval-server-bkzt.onrender.com)

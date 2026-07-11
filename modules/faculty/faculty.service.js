@@ -1,5 +1,5 @@
 import * as facultyRepo from "./faculty.repository.js";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
 
 
 export const getLabs = async (facultyId) => {
@@ -218,7 +218,7 @@ export const fetchLab = async (labId) => {
 
 export const createLab = async (data) => {
   return facultyRepo.createLab({
-    id: data.id ?? randomUUID(),
+    id: data.id ?? randomBytes(4).toString("hex"),
 
     title: data.title,
     start_password: data.start_password,

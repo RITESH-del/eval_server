@@ -43,13 +43,14 @@ const swaggerSpec = {
 
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  limit: 100,
+  limit: 300,
 })
 
 /* Global Middleware */
 app.use(cors({
     origin: [
-        'http://localhost:5173',  // add frontend production url later
+        'http://localhost:5173',
+        'http://localhost:4173',  // add frontend production url later
     ],
     credentials: true
 }));
