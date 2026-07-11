@@ -70,22 +70,23 @@ export const getSubmissionById = async (examId, sessionId) => {
         if (!grouped[qid]) {
             grouped[qid] = {
                 question_id: qid,
-      title: submission.question_bank.title,
-      description: submission.question_bank.description,
-      submission_history: [],
-      autograding_score: submission.autograding_score,
-      manual_score: submission.manual_score,
-    };
-  }
+                title: submission.question_bank.title,
+                description: submission.question_bank.description,
+                submission_history: [],
+            };
+        }
 
-    grouped[qid].submission_history.push({
-        id: submission.id,
-        code: submission.submitted_code,
-        language: submission.language,
-        manual_score: submission.manual_score,
-        autograding_score: submission.autograding_score,
-        created_at: submission.created_at,
-    });
+        grouped[qid].autograding_score = submission.autograding_score;
+        grouped[qid].manual_score = submission.manual_score;
+
+        grouped[qid].submission_history.push({
+            id: submission.id,
+            code: submission.submitted_code,
+            language: submission.language,
+            manual_score: submission.manual_score,
+            autograding_score: submission.autograding_score,
+            created_at: submission.created_at,
+        });
     });
 
     response.responses = Object.values(grouped);
@@ -264,7 +265,10 @@ export const updateLab = async (labId, data) => {
   //   throw new ForbiddenError("Not authorized");
   // }
 
-  return facultyRepo.updateLab(labId, data);
+  return facultyRepo.updateLab(labId, {
+    ...data,
+    created_by: existingLab.created_by,
+  });
 };
 
 

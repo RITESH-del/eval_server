@@ -55,7 +55,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "20mb" }));
 app.use(limiter);
 app.use('/api-docs', swaggerUI.serve,  swaggerUI.setup(swaggerJSdoc(swaggerSpec)));
 

@@ -325,38 +325,57 @@ export const updateLab = async (labId, data) => {
       });
 
       for (const q of data.questions) {
-  const existingQuestion = await tx.question_bank.findUnique({
-    where: {
-      id: q.id,
-    },
-  });
+        const existingQuestion = await tx.question_bank.findUnique({
+          where: {
+            id: q.id,
+          },
+        });
 
-  if (!existingQuestion) {
-    await tx.question_bank.create({
-      data: {
-        id: q.id,
-        title: q.title,
-        description: q.statement,
-        subject_tag: q.subject_tag || 'test',
-        difficulty: q.difficulty,
-        created_by: data.created_by,
-      },
-    });
-  }
- else {
-  await tx.question_bank.update({
-    where: {
-      id: existingQuestion.id,
-    },
-    data: {
-      title: q.title,
-      description: q.statement,
-      subject_tag: q.subject_tag || "test",
-      difficulty: q.difficulty,
-    },
-  });
-}
-}
+        if (!existingQuestion) {
+          await tx.question_bank.create({
+            data: {
+              id: q.id,
+              title: q.title,
+              description: q.statement,
+              subject_tag: q.subject_tag || 'test',
+              difficulty: q.difficulty,
+              created_by: data.created_by,
+            },
+          });
+        } else {
+          await tx.question_bank.update({
+            where: {
+              id: existingQuestion.id,
+            },
+            data: {
+              title: q.title,
+              description: q.statement,
+              subject_tag: q.subject_tag || "test",
+              difficulty: q.difficulty,
+            },
+          });
+        }
+
+        // Delete existing test cases for this question
+        await tx.test_cases.deleteMany({
+          where: {
+            question_id: q.id,
+          },
+        });
+
+        // Insert new/updated test cases
+        if (q.testCases && q.testCases.length) {
+          await tx.test_cases.createMany({
+            data: q.testCases.map((tc) => ({
+              id: tc.id || randomUUID(),
+              question_id: q.id,
+              input_data: tc.input,
+              expected_output: tc.output,
+              is_hidden: true,
+            })),
+          });
+        }
+      }
 
       if (data.target_sections?.length) {
         await tx.exam_target_sections.createMany({

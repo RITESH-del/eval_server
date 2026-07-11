@@ -13,6 +13,7 @@ const mockTxExamsCreate = jest.fn();
 const mockTxTargetSectionsCreateMany = jest.fn();
 const mockTxQuestionBankCreate = jest.fn();
 const mockTxTestCasesCreateMany = jest.fn();
+const mockTxTestCasesDeleteMany = jest.fn();
 const mockTxExamQuestionsCreate = jest.fn();
 
 const mockTxExamsUpdate = jest.fn();
@@ -39,6 +40,7 @@ const mockTxClient = {
   },
   test_cases: {
     createMany: mockTxTestCasesCreateMany,
+    deleteMany: mockTxTestCasesDeleteMany,
   },
   exam_questions: {
     create: mockTxExamQuestionsCreate,

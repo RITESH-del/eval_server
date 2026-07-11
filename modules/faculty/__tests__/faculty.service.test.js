@@ -545,7 +545,7 @@ describe("Faculty Service", () => {
       const result = await updateLab("exam-1", { title: "Updated" });
 
       expect(facultyRepo.findLabById).toHaveBeenCalledWith("exam-1");
-      expect(facultyRepo.updateLab).toHaveBeenCalledWith("exam-1", { title: "Updated" });
+      expect(facultyRepo.updateLab).toHaveBeenCalledWith("exam-1", { title: "Updated", created_by: "faculty-1" });
       expect(result).toEqual({ id: "exam-1", title: "Updated" });
     });
   });
