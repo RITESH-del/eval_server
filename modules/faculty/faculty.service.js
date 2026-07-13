@@ -14,29 +14,83 @@ export const getLabs = async (facultyId) => {
     });
 }
 
-export const getLabDetails = async (examId) => {
-    const sessions = await facultyRepo.getLabDetails(examId)
+// export const getLabDetails = async (examId) => {
+//     const sessions = await facultyRepo.getLabDetails(examId)
 
-    return sessions.map(session => ({
-        session_id: session.id,
-        university_id: session.users?.university_id,
-        name: session.users?.name,
-        section: session.users?.section,
-        language: session.submissions?.[0]?.language,
-        status: session.status,
-        graduation_year: session.users?.graduation_year,
-        start_time: session.exams?.start_time,
-        total_manual_score: session.submissions?.reduce(
-                (sum, sub) => sum + (sub.manual_score || 0),
-                0
-            ) || null,   
-        total_autograding_score: session.submissions?.reduce(
-                (sum, sub) => sum + (sub.autograding_score || 0),
-                0
-            ) || null,
-        title: session.exams?.title,
-    }));
-}
+//     return sessions.map(session => ({
+//         session_id: session.id,
+//         university_id: session.users?.university_id,
+//         name: session.users?.name,
+//         section: session.users?.section,
+//         language: session.submissions?.[0]?.language,
+//         status: session.status,
+//         graduation_year: session.users?.graduation_year,
+//         start_time: session.exams?.start_time,
+//         total_manual_score: session.submissions?.reduce(
+//                 (sum, sub) => sum + (sub.manual_score || 0),
+//                 0
+//             ) || null,   
+//         total_autograding_score: session.submissions?.reduce(
+//                 (sum, sub) => sum + (sub.autograding_score || 0),
+//                 0
+//             ) || null,
+//         title: session.exams?.title,
+//     }));
+// }
+
+export const getLabDetails = async (examId) => {
+  const sessions = await facultyRepo.getLabDetails(examId);
+
+  return sessions.map((session) => {
+    const bestManualScores = new Map();
+    const bestAutoScores = new Map();
+
+    for (const submission of session.submissions ?? []) {
+      const questionId = submission.question_id;
+
+      const manualScore = submission.manual_score ?? 0;
+      const autoScore = submission.autograding_score ?? 0;
+
+      bestManualScores.set(
+        questionId,
+        Math.max(
+          bestManualScores.get(questionId) ?? 0,
+          manualScore
+        )
+      );
+
+      bestAutoScores.set(
+        questionId,
+        Math.max(
+          bestAutoScores.get(questionId) ?? 0,
+          autoScore
+        )
+      );
+    }
+
+    return {
+      session_id: session.id,
+      university_id: session.users?.university_id,
+      name: session.users?.name,
+      section: session.users?.section,
+      language: session.submissions?.[0]?.language,
+      status: session.status,
+      graduation_year: session.users?.graduation_year,
+      start_time: session.exams?.start_time,
+      title: session.exams?.title,
+
+      total_manual_score: [...bestManualScores.values()].reduce(
+        (sum, score) => sum + score,
+        0
+      ),
+
+      total_autograding_score: [...bestAutoScores.values()].reduce(
+        (sum, score) => sum + score,
+        0
+      ),
+    };
+  });
+};
 
 export const getAllSubmissions = async (facultyId) => {
     return await facultyRepo.getAllSubmissions(facultyId)
