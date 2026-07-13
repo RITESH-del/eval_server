@@ -81,7 +81,7 @@ export const getLabDetails = async (examId) => {
 
       total_manual_score: [...bestManualScores.values()].reduce(
         (sum, score) => sum + score,
-        0
+        null
       ),
 
       total_autograding_score: [...bestAutoScores.values()].reduce(
@@ -169,38 +169,54 @@ export const getMetaData = async () => {
   };
 };
 
-
 export const getSessions = async () => {
-    const res = await facultyRepo.getSessions();
+  const res = await facultyRepo.getSessions();
 
-    let total_manual_score = 0;
-    let total_autograding_score = 0;
+  return res.map((session) => {
+    const bestManualScores = new Map();
+    const bestAutoScores = new Map();
 
-    return res.map((session) => {
-        total_manual_score += session.submissions?.map((sub) => sub.manual_score);
-        total_autograding_score += session.submissions?.map((sub) => sub.autograding_score);
+    for (const submission of session.submissions ?? []) {
+      const questionId = submission.question_id;
 
-        return {
-            session_id: session.id,
-            university_id: session.users?.university_id,
-            name: session.users?.name,
-            section: session.users?.section,
-            language: session.submissions?.[0]?.language,
-            status: session.status,
-            total_manual_score: session.submissions?.reduce(
-                (sum, sub) => sum + (sub.manual_score || 0),
-                0
-            ) || null,   
-            total_autograding_score: session.submissions?.reduce(
-                (sum, sub) => sum + (sub.autograding_score || 0),
-                0
-            ),
-            title: session.exams?.title,
-            status: session.status,
-        }
-    })
-}
+      bestManualScores.set(
+        questionId,
+        Math.max(
+          bestManualScores.get(questionId) ?? 0,
+          submission.manual_score ?? 0
+        )
+      );
 
+      bestAutoScores.set(
+        questionId,
+        Math.max(
+          bestAutoScores.get(questionId) ?? 0,
+          submission.autograding_score ?? 0
+        )
+      );
+    }
+
+    return {
+      session_id: session.id,
+      university_id: session.users?.university_id,
+      name: session.users?.name,
+      section: session.users?.section,
+      language: session.submissions?.[0]?.language,
+      status: session.status,
+      title: session.exams?.title,
+
+      total_manual_score: [...bestManualScores.values()].reduce(
+        (sum, score) => sum + score,
+        0
+      ),
+
+      total_autograding_score: [...bestAutoScores.values()].reduce(
+        (sum, score) => sum + score,
+        0
+      ),
+    };
+  });
+};
 
 export const fetchLab = async (labId) => {
   const lab = await facultyRepo.fetchLabById(labId);
