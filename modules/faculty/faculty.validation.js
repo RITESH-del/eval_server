@@ -35,7 +35,7 @@ export const createLabSchema = z.object({
 export const updateLabSchema = createLabSchema;
 
 export const manualScoreSchema = z.object({
-  manual_score: z.number().positive("manual score must be positive"),
+  manual_score: z.number().min(0).max(100),
 });
 
 export const validate = (schema) => {
