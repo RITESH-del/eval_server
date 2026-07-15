@@ -34,9 +34,10 @@ export const createLabSchema = z.object({
 
 export const updateLabSchema = createLabSchema;
 
-export const manualScoreSchema = z.object({
+export const manualScoreSchema = z.array(z.object({
+  submission_id: z.string(),
   manual_score: z.number().min(0).max(100),
-});
+}));
 
 export const validate = (schema) => {
   return async (req, res, next) => {

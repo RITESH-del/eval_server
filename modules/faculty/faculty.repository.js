@@ -424,18 +424,19 @@ export const deleteLab = async (labId) => {
 };
 
 
-export const updateManualScore = async (
-  submissionId,
-  manualScore
-) => {
-  return await prisma.submissions.update({
-    where: {
-      id: submissionId,
-    },
-    data: {
-      manual_score: manualScore,
-    },
-  });
+export const updateManualScore = async (evaluations) => {
+  return prisma.$transaction(
+    evaluations.map((evaluation) =>
+      prisma.submissions.update({
+        where: {
+          id: evaluation.submission_id,
+        },
+        data: {
+          manual_score: evaluation.manual_score,
+        },
+      })
+    )
+  );
 };
 
 

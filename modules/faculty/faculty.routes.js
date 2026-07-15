@@ -612,7 +612,7 @@ router.delete('/labs/:id', authMiddleware, allow('faculty'), facultyController.d
 router.get('/metadata', authMiddleware, allow('faculty'), facultyController.getMetaData); // for quizConfig.json
 
 
-router.patch("/submissions/:submissionId/manual-score",  validate(manualScoreSchema), authMiddleware, allow('faculty'), facultyController.updateManualScore);
+// router.patch("/submissions/:submissionId/manual-score",  validate(manualScoreSchema), authMiddleware, allow('faculty'), facultyController.updateManualScore);
 
 /**
  * @swagger
@@ -659,5 +659,7 @@ router.patch("/submissions/:submissionId/manual-score",  validate(manualScoreSch
  *         description: Exam not found
  */
 router.post("/publish_result/:examId", authMiddleware, allow('faculty'), facultyController.publishResult);
+
+router.patch("/manual-score", authMiddleware, allow('faculty'), validate(manualScoreSchema), facultyController.updateManualScore);
 
 export default router;

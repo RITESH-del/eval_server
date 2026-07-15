@@ -112,10 +112,7 @@ export const fetchLab = async (req, res, next) => {
 
 export const updateManualScore = async (req, res, next) => {
   try {
-    const submission = await facultyService.updateManualScore(
-      req.params.submissionId,
-      req.body.manual_score
-    );
+    const submission = await facultyService.updateManualScore(req.body);
     res.json(submission);
   } catch (err) {
     next(err);
