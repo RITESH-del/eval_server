@@ -454,7 +454,7 @@ router.get('/submissions/:examId', authMiddleware, allow('faculty'), facultyCont
  *       404:
  *         description: Submission not found
  */
-router.get('/submissions/:examId/session/:sessionId', authMiddleware, allow('faculty'), facultyController.getSubmissionById); // for reviewSols.json, uncomplete, for one submission or one question ID
+router.get('/submissions/:examId/session/:sessionId', authMiddleware, facultyController.getSubmissionById); // for reviewSols.json, uncomplete, for one submission or one question ID
 
 /**
  * @swagger

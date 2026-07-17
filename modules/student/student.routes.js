@@ -14,12 +14,7 @@ const router = Router();
  * 
  * Response: { id, university_id, name, email, section, graduation_year, role }
  */
-router.get(
-  '/profile',
-  authMiddleware,
-  allow('student'),
-  studentController.getProfile
-);
+router.get('/profile', authMiddleware, allow('student'), studentController.getProfile);
 
 /**
  * GET /api/student/exams?page=1
@@ -52,12 +47,7 @@ router.get(
  *   }
  * }
  */
-router.get(
-  '/exams',
-  authMiddleware,
-  allow('student'),
-  studentController.getExams
-);
+router.get('/exams', authMiddleware, allow('student'), studentController.getExams);
 
 /**
  * GET /api/student/exams/:id
@@ -92,11 +82,6 @@ router.get(
  *   ]
  * }
  */
-router.get(
-  '/exams/:id',
-  authMiddleware,
-  allow('student'),
-  studentController.getExamById
-);
+router.get('/exams/:id', authMiddleware, allow('student'), studentController.getExamById);
 
 export default router;

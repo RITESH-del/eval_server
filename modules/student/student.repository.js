@@ -85,7 +85,7 @@ export const countStudentExams = (studentId) => {
     where: {
       student_id: studentId,
       exams: {
-        result_published: false,
+        result_published: true,
       },
     },
   });

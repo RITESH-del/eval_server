@@ -66,6 +66,7 @@ export const getProfile = async (studentId) => {
 };
 
 // ===== Exam list with pagination =====
+
 export const getExams = async (studentId, page = 1) => {
   // Get lightweight session data
   const sessions = await studentRepo.getExamsListPaginated(studentId, page, 15);
@@ -105,24 +106,29 @@ export const getExams = async (studentId, page = 1) => {
     setCacheWithTTL(cacheKey, totalExams, 1800); // 30 min cache
   }
 
+  console.log(JSON.stringify(sessions, null, 2));
+
   const exams = sessions.map((session) => {
     const scores = scoreMap.get(session.id) || {
       manual: 0,
       autograding: 0,
     };
 
-    return {
-      session_id: session.id,
-      exam_id: session.exam_id,
-      title: session.exams?.title,
-      status: session.status,
-      submitted_at: session.submitted_at,
-      start_time: session.exams?.start_time,
-      total_marks: session.exams?.total_marks,
-      total_manual_score: scores.manual,
-      total_autograding_score: scores.autograding,
-      submission_count: session._count.submissions,
-    };
+return {
+    session_id: session.id,
+    exam_id: session.exam_id,
+    title: session.exams?.title,
+    status: session.status,
+    submitted_at: session.submitted_at,
+    start_time: session.exams?.start_time,
+    total_marks: session.exams?.total_marks,
+
+    result_published: session.exams?.result_published,
+
+    total_manual_score: scores.manual,
+    total_autograding_score: scores.autograding,
+    submission_count: session._count.submissions,
+};
   });
 
   return {
