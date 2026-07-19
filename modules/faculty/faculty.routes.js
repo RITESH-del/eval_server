@@ -660,6 +660,6 @@ router.get('/metadata', authMiddleware, allow('faculty'), facultyController.getM
  */
 router.post("/publish_result/:examId", authMiddleware, allow('faculty'), facultyController.publishResult);
 
-router.patch("/manual-score", authMiddleware, allow('faculty'), validate(manualScoreSchema), facultyController.updateManualScore);
+router.patch("/manual-score/:sessionId", authMiddleware, allow('faculty'), validate(manualScoreSchema), facultyController.updateManualScore);
 
 export default router;

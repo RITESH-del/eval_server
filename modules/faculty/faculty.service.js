@@ -359,8 +359,8 @@ export const deleteLab = async (labId, facultyId) => {
 
 
 
-export const updateManualScore = async(evaluations) =>{
-  await facultyRepo.updateManualScore(evaluations);
+export const updateManualScore = async(evaluations, sessionId) =>{
+  await facultyRepo.updateManualScore(evaluations, sessionId);
 
   return {
     success: true,

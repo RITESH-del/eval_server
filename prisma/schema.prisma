@@ -9,8 +9,8 @@ datasource db {
 }
 
 model exam_questions {
-  exam_id         String        @db.VarChar(36)
-  question_id     String        @db.VarChar(36)
+  exam_id         String        @db.Char(36)
+  question_id     String        @db.Char(36)
   marks_weightage Int
   exams           exams         @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_eq_exam_id")
   question_bank   question_bank @relation(fields: [question_id], references: [id], onUpdate: NoAction, map: "fk_eq_question_id")
@@ -20,7 +20,7 @@ model exam_questions {
 }
 
 model exams {
-  id                     String                  @id @db.VarChar(36)
+  id                     String                  @id @db.Char(36)
   title                  String                  @db.VarChar(255)
   start_password_hash    String                  @db.VarChar(255)
   is_active              Boolean?                @default(false)
@@ -31,7 +31,7 @@ model exams {
   target_graduation_year Int
   start_time             DateTime                @db.Timestamp(0)
   end_time               DateTime                @db.Timestamp(0)
-  created_by             String?                 @db.VarChar(36)
+  created_by             String?                 @db.Char(36)
   created_at             DateTime?               @default(now()) @db.Timestamp(0)
   exam_questions         exam_questions[]
   exam_target_sections   exam_target_sections[]
@@ -39,16 +39,15 @@ model exams {
   student_exam_sessions  student_exam_sessions[]
 
   @@index([created_by], map: "fk_exams_created_by")
-  @@index([target_graduation_year, is_live, is_active], map: "idx_exams_live_targeting")
 }
 
 model question_bank {
-  id             String                   @id @db.VarChar(36)
+  id             String                   @id @db.Char(36)
   title          String                   @db.VarChar(255)
   description    String                   @db.Text
   subject_tag    String                   @db.VarChar(100)
   difficulty     question_bank_difficulty
-  created_by     String?                  @db.VarChar(36)
+  created_by     String?                  @db.Char(36)
   created_at     DateTime?                @default(now()) @db.Timestamp(0)
   exam_questions exam_questions[]
   users          users?                   @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_qb_created_by")
@@ -59,25 +58,26 @@ model question_bank {
 }
 
 model student_exam_sessions {
-  id           String                       @id @db.VarChar(36)
-  exam_id      String                       @db.VarChar(36)
-  student_id   String                       @db.VarChar(36)
-  status       student_exam_sessions_status @default(allocated)
-  started_at   DateTime?                    @db.Timestamp(0)
-  submitted_at DateTime?                    @db.Timestamp(0)
-  ip_address   String?                      @db.VarChar(45)
-  exams        exams                        @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_exam_id")
-  users        users                        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_student_id")
-  submissions  submissions[]
+  id                 String                       @id @db.Char(36)
+  exam_id            String                       @db.Char(36)
+  student_id         String                       @db.Char(36)
+  status             student_exam_sessions_status @default(allocated)
+  started_at         DateTime?                    @db.Timestamp(0)
+  submitted_at       DateTime?                    @db.Timestamp(0)
+  ip_address         String?                      @db.VarChar(45)
+  hardware_hash_used String?                      @db.VarChar(64)
+  exams              exams                        @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_exam_id")
+  users              users                        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_student_id")
+  submissions        submissions[]
 
   @@unique([exam_id, student_id], map: "uq_exam_student")
   @@index([student_id], map: "fk_ses_student_id")
 }
 
 model submissions {
-  id                    String                         @id @db.VarChar(36)
-  session_id            String                         @db.VarChar(36)
-  question_id           String                         @db.VarChar(36)
+  id                    String                         @id @db.Char(36)
+  session_id            String                         @db.Char(36)
+  question_id           String                         @db.Char(36)
   submitted_code        String                         @db.Text
   language              String                         @db.VarChar(20)
   autograding_status    submissions_autograding_status @default(pending)
@@ -89,12 +89,11 @@ model submissions {
 
   @@index([question_id], map: "fk_sub_question_id")
   @@index([session_id], map: "fk_sub_session_id")
-  @@index([autograding_status], map: "idx_submissions_grading_queue")
 }
 
 model test_cases {
-  id              String        @id @db.VarChar(36)
-  question_id     String        @db.VarChar(36)
+  id              String        @id @db.Char(36)
+  question_id     String        @db.Char(36)
   input_data      String        @db.Text
   expected_output String        @db.Text
   is_hidden       Boolean?      @default(true)
@@ -105,7 +104,7 @@ model test_cases {
 }
 
 model users {
-  id                    String                  @id @db.VarChar(36)
+  id                    String                  @id @db.Char(36)
   university_id         String                  @unique(map: "university_id") @db.VarChar(50)
   name                  String                  @db.VarChar(255)
   email                 String                  @unique(map: "email") @db.VarChar(255)
@@ -125,14 +124,6 @@ model exam_target_sections {
   exams   exams  @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ets_exam_id")
 
   @@id([exam_id, section])
-  @@index([section], map: "idx_ets_section")
-}
-
-enum student_exam_sessions_status {
-  allocated
-  ongoing
-  submitted
-  absent
 }
 
 enum question_bank_difficulty {
@@ -152,4 +143,12 @@ enum submissions_autograding_status {
   passed
   failed
   error
+}
+
+enum student_exam_sessions_status {
+  allocated
+  ongoing
+  submitted
+  absent
+  evaluated
 }

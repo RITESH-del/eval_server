@@ -424,19 +424,47 @@ export const deleteLab = async (labId) => {
 };
 
 
-export const updateManualScore = async (evaluations) => {
-  return prisma.$transaction(
-    evaluations.map((evaluation) =>
-      prisma.submissions.update({
-        where: {
-          id: evaluation.submission_id,
-        },
-        data: {
-          manual_score: evaluation.manual_score,
-        },
-      })
-    )
+// export const updateManualScore = async (evaluations, sessionId) => {
+//   return prisma.$transaction(
+//     evaluations.map((evaluation) =>
+//       prisma.submissions.update({
+//         where: {
+//           id: evaluation.submission_id,
+//         },
+//         data: {
+//           manual_score: evaluation.manual_score,
+//         },
+//       })
+//     ),
+    
+//     prisma.student_exam_sessions.update({
+//       where: {
+//         id: sessionId,
+//       },
+//       data: {
+//         status: "evaluated",
+//       }
+//     })
+
+//   );
+// };
+
+export const updateManualScore = async (evaluations, sessionId) => {
+  const queries = evaluations.map((evaluation) =>
+    prisma.submissions.update({
+      where: { id: evaluation.submission_id },
+      data: { manual_score: evaluation.manual_score },
+    })
   );
+
+  queries.push(
+    prisma.student_exam_sessions.update({
+      where: { id: sessionId },
+      data: { status: "evaluated" },
+    })
+  );
+
+  return prisma.$transaction(queries);
 };
 
 
