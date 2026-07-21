@@ -220,10 +220,12 @@ export const getSessions = async () => {
 
 export const fetchLab = async (labId) => {
   const lab = await facultyRepo.fetchLabById(labId);
-
   return {
     id: lab.id,
     title: lab.title,
+    course_name: lab.course_name,
+    course_code: lab.course_code,
+    exam_category: lab.exam_category,
     total_marks: lab.total_marks,
     start_password: lab.start_password_hash,
     duration_minutes: lab.duration_minutes,
@@ -241,6 +243,13 @@ export const fetchLab = async (labId) => {
             statement: q.question_bank.description,
             marks: q.marks_weightage,
             difficulty: q.question_bank.difficulty,
+            testCaseFile: q.question_bank.test_case_url
+            ? {
+                url: q.question_bank.test_case_url,
+                filename: q.question_bank.test_case_filename,
+                public_id: q.question_bank.test_case_public_id,
+              }
+            : null,
             diagram: null,
             testCases: q.question_bank.test_cases.map(t => {
                 return {
@@ -250,7 +259,6 @@ export const fetchLab = async (labId) => {
                     is_hidden: t.is_hidden
                 }
             })
-
         }
     })
   };
@@ -294,6 +302,9 @@ export const createLab = async (data) => {
     title: data.title,
     start_password: data.start_password,
     total_marks: data.total_marks,
+    course_name: data.course_name,
+    course_code: data.course_code,
+    exam_category: data.exam_category || 'regular',
     duration_minutes: data.duration_minutes,
 
     target_graduation_year: data.target_graduation_year,
@@ -316,8 +327,11 @@ export const createLab = async (data) => {
 
       testCases: (question.testCases ?? []).map((tc) => ({
         id: tc.id ?? randomUUID(),
-        input: tc.input,
-        output: tc.output,
+        input: tc.input || "",
+        output: tc.output || "",
+        url: tc.url,
+        filename: tc.filename,
+        public_id: tc.public_id
       })),
     })),
   });

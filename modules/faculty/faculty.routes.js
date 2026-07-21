@@ -4,6 +4,8 @@ import { allow } from '../../shared/middleware/RABC.middleware.js';
 import * as facultyController from './faculty.controller.js';
 import { createLabSchema, updateLabSchema, manualScoreSchema } from './faculty.validation.js';
 import { validate } from '../../shared/middleware/validate.middleware.js';
+import upload from "../../shared/middleware/upload.middleware.js";
+
 const router = Router();
 
 /**
@@ -662,4 +664,7 @@ router.post("/publish_result/:examId", authMiddleware, allow('faculty'), faculty
 
 router.patch("/manual-score/:sessionId", authMiddleware, allow('faculty'), validate(manualScoreSchema), facultyController.updateManualScore);
 
+router.post("/upload-image", upload.single("image"), authMiddleware, allow('faculty'), facultyController.uploadImage);
+
+router.post("/upload-test-cases", upload.single("file"), authMiddleware, allow('faculty'), facultyController.uploadTestCases);
 export default router;

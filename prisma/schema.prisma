@@ -33,6 +33,9 @@ model exams {
   end_time               DateTime                @db.Timestamp(0)
   created_by             String?                 @db.Char(36)
   created_at             DateTime?               @default(now()) @db.Timestamp(0)
+  course_name            String                  @db.VarChar(255)
+  course_code            String                  @db.VarChar(255)
+  exam_category          exams_exam_category     @default(regular)
   exam_questions         exam_questions[]
   exam_target_sections   exam_target_sections[]
   users                  users?                  @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_exams_created_by")
@@ -42,17 +45,20 @@ model exams {
 }
 
 model question_bank {
-  id             String                   @id @db.Char(36)
-  title          String                   @db.VarChar(255)
-  description    String                   @db.Text
-  subject_tag    String                   @db.VarChar(100)
-  difficulty     question_bank_difficulty
-  created_by     String?                  @db.Char(36)
-  created_at     DateTime?                @default(now()) @db.Timestamp(0)
-  exam_questions exam_questions[]
-  users          users?                   @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_qb_created_by")
-  submissions    submissions[]
-  test_cases     test_cases[]
+  id                  String                   @id @db.Char(36)
+  title               String                   @db.VarChar(255)
+  description         String                   @db.Text
+  subject_tag         String                   @db.VarChar(100)
+  difficulty          question_bank_difficulty
+  created_by          String?                  @db.Char(36)
+  created_at          DateTime?                @default(now()) @db.Timestamp(0)
+  test_case_url       String?                  @db.Text
+  test_case_public_id String?                  @db.Text
+  test_case_filename  String?                  @db.VarChar(255)
+  exam_questions      exam_questions[]
+  users               users?                   @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_qb_created_by")
+  submissions         submissions[]
+  test_cases          test_cases[]
 
   @@index([created_by], map: "fk_qb_created_by")
 }
@@ -66,6 +72,7 @@ model student_exam_sessions {
   submitted_at       DateTime?                    @db.Timestamp(0)
   ip_address         String?                      @db.VarChar(45)
   hardware_hash_used String?                      @db.VarChar(64)
+  teacher_remarks    String?                      @db.Text
   exams              exams                        @relation(fields: [exam_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_exam_id")
   users              users                        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_ses_student_id")
   submissions        submissions[]
@@ -151,4 +158,9 @@ enum student_exam_sessions_status {
   submitted
   absent
   evaluated
+}
+
+enum exams_exam_category {
+  regular
+  repeat
 }

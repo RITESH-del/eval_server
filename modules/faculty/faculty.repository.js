@@ -133,84 +133,6 @@ export const fetchLabById = async(examId) => {
 
 
 
-
-// export const createLab = async (data) => {
-//   console.time("createLab");
-
-//   const result = await prisma.$transaction(async (tx) => {
-//     // Create Exam
-//     const exam = await tx.exams.create({
-//       data: {
-//         id: data.id,
-//         title: data.title,
-//         start_password_hash: data.start_password,
-//         total_marks: data.total_marks,
-//         duration_minutes: data.duration_minutes,
-//         target_graduation_year: data.target_graduation_year,
-//         start_time: data.start_time,
-//         end_time: data.end_time,
-//         created_by: data.created_by,
-//       },
-//     });
-
-//     // Target Sections
-//     if (data.target_sections.length) {
-//       await tx.exam_target_sections.createMany({
-//         data: data.target_sections.map((section) => ({
-//           exam_id: exam.id,
-//           section,
-//         })),
-//       });
-//     }
-
-//     // Questions
-//     for (const question of data.questions) {
-//       await tx.question_bank.create({
-//         data: {
-//           id: question.id,
-//           title: question.title,
-//           description: question.statement,
-//           subject_tag: question.subject_tag,
-//           difficulty: question.difficulty,
-//           created_by: data.created_by,
-//         },
-//       });
-
-//       // Test Cases
-//       if (question.testCases.length) {
-//         await tx.test_cases.createMany({
-//           data: question.testCases.map((tc) => ({
-//             id: tc.id,
-//             question_id: question.id,
-//             input_data: tc.input,
-//             expected_output: tc.output,
-//             is_hidden: true,
-//           })),
-//         });
-//       }
-
-//       // Exam Question Mapping
-//       await tx.exam_questions.create({
-//         data: {
-//           exam_id: exam.id,
-//           question_id: question.id,
-//           marks_weightage: question.marks,
-//         },
-//       });
-//     }
-
-//     return exam;
-//   }, {
-//     timeout: 45000
-//   });
-
-
-
-//   console.timeEnd("createLab");
-//   return result;
-// };
-
-
 export const createLab = async (data) => {
   console.time("createLab");
 
@@ -221,6 +143,9 @@ export const createLab = async (data) => {
         data: {
           id: data.id,
           title: data.title,
+          course_name: data.course_name,
+          course_code: data.course_code,
+          exam_category: data.exam_category,
           start_password_hash: data.start_password,
           total_marks: data.total_marks,
           duration_minutes: data.duration_minutes,
@@ -250,6 +175,10 @@ export const createLab = async (data) => {
           subject_tag: question.subject_tag,
           difficulty: question.difficulty,
           created_by: data.created_by,
+
+          test_case_url: question.testCaseFile?.url ?? null,
+          test_case_filename: question.testCaseFile?.filename ?? null,
+          test_case_public_id: question.testCaseFile?.public_id ?? null,
         })),
       });
 
@@ -260,6 +189,9 @@ export const createLab = async (data) => {
           question_id: question.id,
           input_data: tc.input,
           expected_output: tc.output,
+          _url: tc.url,
+          filename: tc.filename,
+          public_id: tc.public_id,
           is_hidden: true,
         }))
       );
@@ -303,6 +235,9 @@ export const updateLab = async (labId, data) => {
         data: {
           title: data.title,
           total_marks: data.total_marks,
+          course_name: data.course_name,
+          course_code: data.course_code,
+          exam_category: data.exam_category,
           start_password_hash: data.start_password,
           duration_minutes: data.duration_minutes,
           target_graduation_year: data.target_graduation_year,
@@ -340,13 +275,22 @@ export const updateLab = async (labId, data) => {
               subject_tag: q.subject_tag || "test",
               difficulty: q.difficulty,
               created_by: data.created_by,
+
+              test_case_url: q.testCaseFile?.url ?? null,
+              test_case_filename: q.testCaseFile?.filename ?? null,
+              test_case_public_id: q.testCaseFile?.public_id ?? null,
             },
+
             update: {
               title: q.title,
               description: q.statement,
               subject_tag: q.subject_tag || "test",
               difficulty: q.difficulty,
-            },
+
+              test_case_url: q.testCaseFile?.url ?? null,
+              test_case_filename: q.testCaseFile?.filename ?? null,
+              test_case_public_id: q.testCaseFile?.public_id ?? null,
+            }
           })
         )
       );
@@ -367,9 +311,14 @@ export const updateLab = async (labId, data) => {
           question_id: q.id,
           input_data: tc.input,
           expected_output: tc.output,
+          _url: tc.url,
+          filename: tc.filename,
+          public_id: tc.public_id,
           is_hidden: true,
         }))
       );
+
+  
 
       // Insert all test cases in one query
       if (testCases.length) {
