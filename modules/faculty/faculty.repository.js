@@ -189,9 +189,6 @@ export const createLab = async (data) => {
           question_id: question.id,
           input_data: tc.input,
           expected_output: tc.output,
-          _url: tc.url,
-          filename: tc.filename,
-          public_id: tc.public_id,
           is_hidden: true,
         }))
       );
@@ -311,9 +308,6 @@ export const updateLab = async (labId, data) => {
           question_id: q.id,
           input_data: tc.input,
           expected_output: tc.output,
-          _url: tc.url,
-          filename: tc.filename,
-          public_id: tc.public_id,
           is_hidden: true,
         }))
       );
@@ -441,4 +435,26 @@ export const publishResult = async (examId) => {
     }
   })
   
+}
+
+export const addRemarks = async ({ session_id, description }) => {
+  return prisma.student_exam_sessions.update({
+    where: {
+      id: session_id,
+    },
+    data: {
+      teacher_remarks: description,
+    },
+  });
+};
+
+export const fetchRemarks = async(session_id) => {
+  return prisma.student_exam_sessions.findUnique({
+    where: {
+      id: session_id,
+    },
+    select: {
+      teacher_remarks: true
+    }
+  })
 }

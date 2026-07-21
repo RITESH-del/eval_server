@@ -46,6 +46,11 @@ export const manualScoreSchema = z.array(z.object({
   manual_score: z.number().min(0).max(100),
 }));
 
+export const addRemarkSchema = z.object({
+  session_id: z.string(),
+  description: z.string().max(500),
+});
+
 export const validate = (schema) => {
   return async (req, res, next) => {
     try {

@@ -386,3 +386,14 @@ export const updateManualScore = async(evaluations, sessionId) =>{
 export const publishResult = async(examId) => {
   return await facultyRepo.publishResult(examId);
 }
+
+export const addRemarks = async(session_id, description) => {
+  await facultyRepo.addRemarks({
+    session_id: session_id,
+    description: description,
+  })
+}
+
+export const fetchRemarks = async(sessionId) => {
+  return await facultyRepo.fetchRemarks(sessionId)
+}

@@ -201,3 +201,23 @@ export const uploadTestCases = async (req, res, next) => {
     next(error);
   }
 };
+
+export const addRemarks = async (req, res, next) => {
+  try {
+    const { session_id, description } = req.body;
+    const remark = await facultyService.addRemarks(session_id, description);
+    res.json(remark);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const fetchRemarks = async (req, res, next) => {
+  try {
+    const { session_id } = req.params;
+    const remark = await facultyService.fetchRemarks(session_id);
+    res.json(remark);
+  } catch (err) {
+    next(err);
+  }
+}

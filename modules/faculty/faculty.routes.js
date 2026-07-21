@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '../../shared/middleware/auth.middleware.js';
 import { allow } from '../../shared/middleware/RABC.middleware.js';
 import * as facultyController from './faculty.controller.js';
-import { createLabSchema, updateLabSchema, manualScoreSchema } from './faculty.validation.js';
+import { createLabSchema, updateLabSchema, manualScoreSchema, addRemarkSchema } from './faculty.validation.js';
 import { validate } from '../../shared/middleware/validate.middleware.js';
 import upload from "../../shared/middleware/upload.middleware.js";
 
@@ -667,4 +667,7 @@ router.patch("/manual-score/:sessionId", authMiddleware, allow('faculty'), valid
 router.post("/upload-image", upload.single("image"), authMiddleware, allow('faculty'), facultyController.uploadImage);
 
 router.post("/upload-test-cases", upload.single("file"), authMiddleware, allow('faculty'), facultyController.uploadTestCases);
+
+router.post("/add-remarks", authMiddleware, allow('faculty'), validate(addRemarkSchema), facultyController.addRemarks);
+router.get("/remarks/:session_id", authMiddleware, allow('faculty'), facultyController.fetchRemarks);
 export default router;
