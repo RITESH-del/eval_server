@@ -72,9 +72,11 @@ export const getLabDetails = async (examId) => {
       session_id: session.id,
       university_id: session.users?.university_id,
       name: session.users?.name,
+      email: session.users?.email,
       section: session.users?.section,
       language: session.submissions?.[0]?.language,
       status: session.status,
+      remark: session?.teacher_remarks,
       graduation_year: session.users?.graduation_year,
       start_time: session.exams?.start_time,
       title: session.exams?.title,
@@ -93,7 +95,7 @@ export const getLabDetails = async (examId) => {
 };
 
 export const getAllSubmissions = async (facultyId) => {
-    return await facultyRepo.getAllSubmissions(facultyId)
+    return await facultyRepo.getAllSubmissions(facultyId);
 }
 
 
@@ -112,6 +114,8 @@ export const getSubmissionById = async (examId, sessionId) => {
             title: session.exams.title,
         },
 
+        teacher_remarks: session.teacher_remarks,
+        
         responses: [],
         };
 

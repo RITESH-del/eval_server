@@ -36,7 +36,7 @@ export const getAllSubmissions = async (examId) => {
 const sessions =  await prisma.student_exam_sessions.findMany({
   where: {
     exam_id: examId
-  }
+  },
 });
 
 return sessions;
